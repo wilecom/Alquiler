@@ -25,6 +25,7 @@ export type Database = {
           nombre_completo?: string
           created_at?: string
         }
+        Relationships: []
       }
       vehiculos: {
         Row: {
@@ -63,6 +64,7 @@ export type Database = {
           estado?: 'disponible' | 'arrendado' | 'inactivo'
           created_at?: string
         }
+        Relationships: []
       }
       conductores: {
         Row: {
@@ -110,6 +112,15 @@ export type Database = {
           tiene_multas?: boolean
           created_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: 'conductores_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: true
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          }
+        ]
       }
       entrevistas: {
         Row: {
@@ -151,6 +162,15 @@ export type Database = {
         }
         Insert: Omit<Database['public']['Tables']['entrevistas']['Row'], 'id' | 'created_at'> & { id?: string; created_at?: string }
         Update: Partial<Database['public']['Tables']['entrevistas']['Insert']>
+        Relationships: [
+          {
+            foreignKeyName: 'entrevistas_conductor_id_fkey'
+            columns: ['conductor_id']
+            isOneToOne: false
+            referencedRelation: 'conductores'
+            referencedColumns: ['id']
+          }
+        ]
       }
       contratos: {
         Row: {
@@ -190,6 +210,22 @@ export type Database = {
           created_at?: string
         }
         Update: Partial<Database['public']['Tables']['contratos']['Insert']>
+        Relationships: [
+          {
+            foreignKeyName: 'contratos_conductor_id_fkey'
+            columns: ['conductor_id']
+            isOneToOne: false
+            referencedRelation: 'conductores'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'contratos_vehiculo_id_fkey'
+            columns: ['vehiculo_id']
+            isOneToOne: false
+            referencedRelation: 'vehiculos'
+            referencedColumns: ['id']
+          }
+        ]
       }
       pagos: {
         Row: {
@@ -221,6 +257,15 @@ export type Database = {
           created_at?: string
         }
         Update: Partial<Database['public']['Tables']['pagos']['Insert']>
+        Relationships: [
+          {
+            foreignKeyName: 'pagos_contrato_id_fkey'
+            columns: ['contrato_id']
+            isOneToOne: false
+            referencedRelation: 'contratos'
+            referencedColumns: ['id']
+          }
+        ]
       }
       aplazatorias_solicitudes: {
         Row: {
@@ -240,6 +285,15 @@ export type Database = {
           created_at?: string
         }
         Update: Partial<Database['public']['Tables']['aplazatorias_solicitudes']['Insert']>
+        Relationships: [
+          {
+            foreignKeyName: 'aplazatorias_solicitudes_contrato_id_fkey'
+            columns: ['contrato_id']
+            isOneToOne: false
+            referencedRelation: 'contratos'
+            referencedColumns: ['id']
+          }
+        ]
       }
       comparendos: {
         Row: {
@@ -263,6 +317,15 @@ export type Database = {
           created_at?: string
         }
         Update: Partial<Database['public']['Tables']['comparendos']['Insert']>
+        Relationships: [
+          {
+            foreignKeyName: 'comparendos_contrato_id_fkey'
+            columns: ['contrato_id']
+            isOneToOne: false
+            referencedRelation: 'contratos'
+            referencedColumns: ['id']
+          }
+        ]
       }
       liquidaciones: {
         Row: {
@@ -292,11 +355,21 @@ export type Database = {
           created_at?: string
         }
         Update: Partial<Database['public']['Tables']['liquidaciones']['Insert']>
+        Relationships: [
+          {
+            foreignKeyName: 'liquidaciones_contrato_id_fkey'
+            columns: ['contrato_id']
+            isOneToOne: false
+            referencedRelation: 'contratos'
+            referencedColumns: ['id']
+          }
+        ]
       }
     }
     Views: Record<string, never>
     Functions: Record<string, never>
     Enums: Record<string, never>
+    CompositeTypes: Record<string, never>
   }
 }
 
