@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { notify } from '@/lib/notifications/whatsapp'
 import { redirect } from 'next/navigation'
 import { addWeeks, parseISO } from 'date-fns'
 
@@ -19,7 +20,7 @@ export async function subirComprobante(
 
   const { data: conductor } = await supabase
     .from('conductores')
-    .select('id')
+    .select('id, nombre_completo, telefono')
     .eq('user_id', user.id)
     .single()
 
@@ -103,6 +104,18 @@ export async function subirComprobante(
   if (pagoError) {
     return { error: 'Error al registrar el pago. Contacta al equipo.' }
   }
+
+  await notify({
+    event: 'comprobante.subido',
+    conductor_id: conductor.id,
+    contrato_id: contrato.id,
+    nombre_conductor: conductor.nombre_completo,
+    telefono_conductor: conductor.telefono,
+    semana: semanasProcesadas + 1,
+    monto: 480000,
+    comprobante_url: publicUrl,
+    fecha_pago: hoy,
+  })
 
   return { success: '¡Comprobante enviado! El equipo lo revisará pronto.' }
 }

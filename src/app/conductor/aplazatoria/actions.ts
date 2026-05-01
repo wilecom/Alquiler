@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { notify } from '@/lib/notifications/whatsapp'
 import { redirect } from 'next/navigation'
 import { addWeeks, parseISO, startOfMonth, endOfMonth } from 'date-fns'
 
@@ -19,7 +20,7 @@ export async function solicitarAplazatoria(
 
   const { data: conductor } = await supabase
     .from('conductores')
-    .select('id')
+    .select('id, nombre_completo, telefono')
     .eq('user_id', user.id)
     .single()
 
@@ -71,6 +72,16 @@ export async function solicitarAplazatoria(
   if (insertError) {
     return { error: 'Error al crear la solicitud. Intenta de nuevo.' }
   }
+
+  await notify({
+    event: 'aplazatoria.pendiente',
+    conductor_id: conductor.id,
+    contrato_id: contrato.id,
+    nombre_conductor: conductor.nombre_completo,
+    telefono_conductor: conductor.telefono,
+    semana: semanasProcesadas + 1,
+    motivo: 'Solicitud nueva',
+  })
 
   return { success: '¡Solicitud enviada! El equipo la revisará pronto. Recuerda: la aplazatoria cuesta $200.000.' }
 }

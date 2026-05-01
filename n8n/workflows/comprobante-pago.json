@@ -1,0 +1,87 @@
+{
+  "name": "Leasing - Comprobante de Pago",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "comprobante-pago",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-leasing-001",
+      "name": "Webhook Comprobante",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [240, 300],
+      "webhookId": "comprobante-pago-leasing"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {"id": "a1", "name": "conductor_id", "value": "={{ $json.body.conductor_id }}", "type": "string"},
+            {"id": "a2", "name": "contrato_id", "value": "={{ $json.body.contrato_id }}", "type": "string"},
+            {"id": "a3", "name": "nombre_conductor", "value": "={{ $json.body.nombre_conductor }}", "type": "string"},
+            {"id": "a4", "name": "semana", "value": "={{ $json.body.semana }}", "type": "number"},
+            {"id": "a5", "name": "monto", "value": "={{ $json.body.monto }}", "type": "number"},
+            {"id": "a6", "name": "fecha_pago", "value": "={{ $json.body.fecha_pago }}", "type": "string"},
+            {"id": "a7", "name": "comprobante_url", "value": "={{ $json.body.comprobante_url }}", "type": "string"}
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-fields-001",
+      "name": "Estructurar datos",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v25.0/1055022657703124/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"messaging_product\": \"whatsapp\",\n  \"to\": \"573044903559\",\n  \"type\": \"template\",\n  \"template\": {\n    \"name\": \"equipo_alerta_comprobante\",\n    \"language\": { \"code\": \"es\" },\n    \"components\": [\n      {\n        \"type\": \"body\",\n        \"parameters\": [\n          { \"type\": \"text\", \"text\": \"{{ $json.nombre_conductor }}\" },\n          { \"type\": \"text\", \"text\": \"{{ $json.semana }}\" },\n          { \"type\": \"text\", \"text\": \"{{ $json.monto }}\" }\n        ]\n      }\n    ]\n  }\n}",
+        "options": {}
+      },
+      "id": "http-cp-equipo",
+      "name": "Meta - Alerta Equipo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "ny3omGtGvljUDlzd",
+          "name": "Meta WhatsApp API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: true, recibido: true, message_id: $json.messages?.[0]?.id } }}",
+        "options": {}
+      },
+      "id": "respond-001",
+      "name": "Responder OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [900, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Comprobante": {
+      "main": [[{"node": "Estructurar datos", "type": "main", "index": 0}]]
+    },
+    "Estructurar datos": {
+      "main": [[{"node": "Meta - Alerta Equipo", "type": "main", "index": 0}]]
+    },
+    "Meta - Alerta Equipo": {
+      "main": [[{"node": "Responder OK", "type": "main", "index": 0}]]
+    }
+  },
+  "settings": {"executionOrder": "v1"}
+}

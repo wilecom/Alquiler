@@ -1,0 +1,117 @@
+{
+  "name": "Leasing - Comprobante Resuelto",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "comprobante-resuelto",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "wh-cr-001",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [240, 300],
+      "webhookId": "comprobante-resuelto"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict"},
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.body.decision }}",
+              "rightValue": "verificado",
+              "operator": {"type": "string", "operation": "equals"}
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-cr-001",
+      "name": "Verificado?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v25.0/1055022657703124/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"messaging_product\": \"whatsapp\",\n  \"to\": \"{{ $('Webhook').item.json.body.telefono_conductor }}\",\n  \"type\": \"template\",\n  \"template\": {\n    \"name\": \"comprobante_aprobado\",\n    \"language\": { \"code\": \"es\" },\n    \"components\": [\n      {\n        \"type\": \"body\",\n        \"parameters\": [\n          { \"type\": \"text\", \"text\": \"{{ $('Webhook').item.json.body.nombre_conductor }}\" },\n          { \"type\": \"text\", \"text\": \"{{ $('Webhook').item.json.body.semana }}\" },\n          { \"type\": \"text\", \"text\": \"{{ $('Webhook').item.json.body.monto }}\" }\n        ]\n      }\n    ]\n  }\n}",
+        "options": {}
+      },
+      "id": "http-cr-aprobado",
+      "name": "Meta - Aprobado",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 200],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "ny3omGtGvljUDlzd",
+          "name": "Meta WhatsApp API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v25.0/1055022657703124/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"messaging_product\": \"whatsapp\",\n  \"to\": \"{{ $('Webhook').item.json.body.telefono_conductor }}\",\n  \"type\": \"template\",\n  \"template\": {\n    \"name\": \"comprobante_rechazado\",\n    \"language\": { \"code\": \"es\" },\n    \"components\": [\n      {\n        \"type\": \"body\",\n        \"parameters\": [\n          { \"type\": \"text\", \"text\": \"{{ $('Webhook').item.json.body.nombre_conductor }}\" },\n          { \"type\": \"text\", \"text\": \"{{ $('Webhook').item.json.body.semana }}\" },\n          { \"type\": \"text\", \"text\": \"{{ $('Webhook').item.json.body.motivo || 'No especificado' }}\" }\n        ]\n      }\n    ]\n  }\n}",
+        "options": {}
+      },
+      "id": "http-cr-rechazado",
+      "name": "Meta - Rechazado",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 400],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "ny3omGtGvljUDlzd",
+          "name": "Meta WhatsApp API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: true, decision: $('Webhook').item.json.body.decision, message_id: $json.messages?.[0]?.id } }}",
+        "options": {}
+      },
+      "id": "respond-cr",
+      "name": "Responder OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [900, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{"node": "Verificado?", "type": "main", "index": 0}]]
+    },
+    "Verificado?": {
+      "main": [
+        [{"node": "Meta - Aprobado", "type": "main", "index": 0}],
+        [{"node": "Meta - Rechazado", "type": "main", "index": 0}]
+      ]
+    },
+    "Meta - Aprobado": {
+      "main": [[{"node": "Responder OK", "type": "main", "index": 0}]]
+    },
+    "Meta - Rechazado": {
+      "main": [[{"node": "Responder OK", "type": "main", "index": 0}]]
+    }
+  },
+  "settings": {"executionOrder": "v1"}
+}

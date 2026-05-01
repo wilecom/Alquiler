@@ -1,0 +1,112 @@
+{
+  "name": "Leasing - Mora Diaria (cron)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {"field": "cronExpression", "expression": "0 14 * * *"}
+          ]
+        }
+      },
+      "id": "sched-mora",
+      "name": "Diario 9am Bogotá",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://nyqzwlawchvvqnwwopxc.supabase.co/rest/v1/pagos?select=id,contrato_id,monto,fecha_vencimiento,contratos(conductor_id,conductores(nombre_completo,telefono))&estado=eq.pendiente&fecha_vencimiento=lt.{{ $now.format('yyyy-MM-dd') }}&order=fecha_vencimiento.asc",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {"name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_ROLE_KEY }}"}
+          ]
+        },
+        "options": {}
+      },
+      "id": "http-supabase",
+      "name": "Supabase - Pagos en mora",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1Lhy6PNC90ObruJX",
+          "name": "Supabase Leasing (service_role)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "id": "split-001",
+      "name": "Por cada pago",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {"id": "m1", "name": "telefono", "value": "={{ $json.contratos.conductores.telefono }}", "type": "string"},
+            {"id": "m2", "name": "nombre", "value": "={{ $json.contratos.conductores.nombre_completo }}", "type": "string"},
+            {"id": "m3", "name": "dias_mora", "value": "={{ Math.ceil((new Date() - new Date($json.fecha_vencimiento)) / 86400000) }}", "type": "number"},
+            {"id": "m4", "name": "multa", "value": "={{ Math.ceil((new Date() - new Date($json.fecha_vencimiento)) / 86400000) * 5000 }}", "type": "number"}
+          ]
+        },
+        "options": {}
+      },
+      "id": "calc-mora",
+      "name": "Calcular días/multa",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v25.0/1055022657703124/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"messaging_product\": \"whatsapp\",\n  \"to\": \"{{ $json.telefono }}\",\n  \"type\": \"template\",\n  \"template\": {\n    \"name\": \"recordatorio_mora\",\n    \"language\": { \"code\": \"es\" },\n    \"components\": [\n      {\n        \"type\": \"body\",\n        \"parameters\": [\n          { \"type\": \"text\", \"text\": \"{{ $json.nombre }}\" },\n          { \"type\": \"text\", \"text\": \"{{ $json.dias_mora }}\" },\n          { \"type\": \"text\", \"text\": \"{{ $json.multa }}\" }\n        ]\n      }\n    ]\n  }\n}",
+        "options": {}
+      },
+      "id": "http-meta-mora",
+      "name": "Meta - Recordatorio Conductor",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1120, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "ny3omGtGvljUDlzd",
+          "name": "Meta WhatsApp API"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Diario 9am Bogotá": {
+      "main": [[{"node": "Supabase - Pagos en mora", "type": "main", "index": 0}]]
+    },
+    "Supabase - Pagos en mora": {
+      "main": [[{"node": "Por cada pago", "type": "main", "index": 0}]]
+    },
+    "Por cada pago": {
+      "main": [[{"node": "Calcular días/multa", "type": "main", "index": 0}]]
+    },
+    "Calcular días/multa": {
+      "main": [[{"node": "Meta - Recordatorio Conductor", "type": "main", "index": 0}]]
+    }
+  },
+  "settings": {"executionOrder": "v1"}
+}
