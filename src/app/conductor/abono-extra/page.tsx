@@ -67,8 +67,9 @@ export default async function AbonoExtraPage() {
         <p className="text-xs text-gray-600">
           Cualquier monto que abones se aplica directamente al saldo del vehículo
           (${(200000).toLocaleString('es-CO')} = 1 semana menos). Sigues pagando el canon semanal
-          hasta completar el valor total. Los abonos extras{' '}
-          <span className="font-semibold">no son reembolsables</span>.
+          hasta completar el valor total. Si decides no quedarte con el vehículo, los
+          abonos extras{' '}
+          <span className="font-semibold">son reembolsables</span>.
         </p>
       </div>
 
