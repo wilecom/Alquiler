@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { LayoutDashboard, CreditCard, CalendarOff, Users, Car, AlertTriangle } from 'lucide-react'
+import { LayoutDashboard, CreditCard, CalendarOff, Users, Car, AlertTriangle, Gift } from 'lucide-react'
 import { logoutAction } from '@/app/auth/actions'
 
 const navItems = [
@@ -9,13 +9,14 @@ const navItems = [
   { href: '/equipo/conductores', icon: Users, label: 'Conductores' },
   { href: '/equipo/vehiculos', icon: Car, label: 'Vehículos' },
   { href: '/equipo/comparendos', icon: AlertTriangle, label: 'Comparendos' },
+  { href: '/equipo/beneficios', icon: Gift, label: 'Beneficios' },
 ]
 
 export default function EquipoLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <header className="bg-gray-900 text-white px-4 py-3 flex items-center justify-between">
-        <span className="font-bold text-lg">AutoLeasing <span className="text-gray-400 font-normal text-sm">· Equipo</span></span>
+        <span className="font-bold text-lg">Auto Leasing Medellín <span className="text-gray-400 font-normal text-sm">· Equipo</span></span>
         <form action={logoutAction}>
           <button type="submit" className="text-gray-400 hover:text-white text-sm transition-colors">
             Salir

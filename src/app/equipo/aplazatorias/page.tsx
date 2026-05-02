@@ -2,8 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { format, parseISO } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { CheckCircle2, XCircle, CalendarOff } from 'lucide-react'
+import { CalendarOff } from 'lucide-react'
 import { resolverAplazatoria } from './actions'
+import { AccionesAprobarRechazar } from '@/components/AccionesAprobarRechazar'
 
 export default async function AplazatoriasPage() {
   const supabase = await createClient()
@@ -13,7 +14,7 @@ export default async function AplazatoriasPage() {
   const { data: solicitudes } = await supabase
     .from('aplazatorias_solicitudes')
     .select(`
-      id, semana_solicitada, estado, created_at,
+      id, semana_solicitada, estado, created_at, motivo,
       contratos(
         conductores(nombre_completo),
         vehiculos(marca, modelo, placa),
@@ -65,23 +66,19 @@ export default async function AplazatoriasPage() {
                   <span className="text-gray-700">{format(parseISO(s.created_at), "d MMM, HH:mm", { locale: es })}</span>
                 </div>
               </div>
-              <div className="px-4 pb-4 flex gap-2">
-                <form action={resolverAplazatoria.bind(null, s.id, 'aprobada') as unknown as () => Promise<void>} className="flex-1">
-                  <button
-                    type="submit"
-                    className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-xl py-2.5 transition-colors"
-                  >
-                    <CheckCircle2 size={15} /> Aprobar
-                  </button>
-                </form>
-                <form action={resolverAplazatoria.bind(null, s.id, 'rechazada') as unknown as () => Promise<void>} className="flex-1">
-                  <button
-                    type="submit"
-                    className="w-full flex items-center justify-center gap-2 bg-red-50 hover:bg-red-100 text-red-600 text-sm font-medium rounded-xl py-2.5 border border-red-200 transition-colors"
-                  >
-                    <XCircle size={15} /> Rechazar
-                  </button>
-                </form>
+              {s.motivo && (
+                <div className="px-4 pb-3">
+                  <div className="bg-gray-50 rounded-xl px-3 py-2 text-sm text-gray-700">
+                    <span className="text-xs text-gray-400 block mb-0.5">Motivo del conductor</span>
+                    {s.motivo}
+                  </div>
+                </div>
+              )}
+              <div className="px-4 pb-4">
+                <AccionesAprobarRechazar
+                  aprobar={resolverAplazatoria.bind(null, s.id, 'aprobada')}
+                  rechazar={resolverAplazatoria.bind(null, s.id, 'rechazada')}
+                />
               </div>
             </div>
           )

@@ -7,8 +7,13 @@ import { revalidatePath } from 'next/cache'
 export async function resolverAplazatoria(
   solicitudId: string,
   decision: 'aprobada' | 'rechazada',
-  motivo?: string,
+  formData: FormData,
 ) {
+  const motivo =
+    decision === 'rechazada'
+      ? formData.get('motivo')?.toString().trim() || undefined
+      : undefined
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }

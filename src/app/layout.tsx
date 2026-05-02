@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AutoLeasing",
-  description: "Gestión de leasing automotriz con opción de compra",
+  title: "Auto Leasing Medellín",
+  description: "Auto Leasing Medellín — gestión de leasing automotriz con opción de compra",
 };
 
 export default function RootLayout({

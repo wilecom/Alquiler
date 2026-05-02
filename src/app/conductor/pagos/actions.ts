@@ -85,10 +85,6 @@ export async function subirComprobante(
     return { error: 'Error al subir el archivo. Intenta de nuevo.' }
   }
 
-  const { data: { publicUrl } } = supabase.storage
-    .from('comprobantes')
-    .getPublicUrl(fileName)
-
   const hoy = new Date().toISOString().split('T')[0]
 
   const { error: pagoError } = await supabase.from('pagos').insert({
@@ -97,13 +93,17 @@ export async function subirComprobante(
     fecha_pago: hoy,
     fecha_vencimiento: fechaVencimientoStr,
     monto: 480000,
-    comprobante_url: publicUrl,
+    comprobante_url: fileName,
     estado: 'comprobante_subido',
   })
 
   if (pagoError) {
     return { error: 'Error al registrar el pago. Contacta al equipo.' }
   }
+
+  const { data: signed } = await supabase.storage
+    .from('comprobantes')
+    .createSignedUrl(fileName, 60 * 60 * 24 * 7)
 
   await notify({
     event: 'comprobante.subido',
@@ -113,7 +113,7 @@ export async function subirComprobante(
     telefono_conductor: conductor.telefono,
     semana: semanasProcesadas + 1,
     monto: 480000,
-    comprobante_url: publicUrl,
+    comprobante_url: signed?.signedUrl ?? fileName,
     fecha_pago: hoy,
   })
 

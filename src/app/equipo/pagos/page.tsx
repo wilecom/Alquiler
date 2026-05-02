@@ -2,8 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { format, parseISO } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { CheckCircle2, XCircle, FileText, CreditCard } from 'lucide-react'
+import { FileText, CreditCard } from 'lucide-react'
 import { verificarPago } from './actions'
+import { AccionesAprobarRechazar } from '@/components/AccionesAprobarRechazar'
 
 function formatCOP(v: number) {
   return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(v)
@@ -27,6 +28,19 @@ export default async function EquipoPagosPage() {
     `)
     .eq('estado', 'comprobante_subido')
     .order('created_at', { ascending: true })
+
+  const comprobanteUrls = new Map<string, string>()
+  for (const p of pagos ?? []) {
+    if (!p.comprobante_url) continue
+    const path = p.comprobante_url.startsWith('http')
+      ? p.comprobante_url.split('/comprobantes/')[1]
+      : p.comprobante_url
+    if (!path) continue
+    const { data: signed } = await supabase.storage
+      .from('comprobantes')
+      .createSignedUrl(path, 60 * 60)
+    if (signed?.signedUrl) comprobanteUrls.set(p.id, signed.signedUrl)
+  }
 
   return (
     <div className="p-4 space-y-4 max-w-2xl mx-auto">
@@ -88,10 +102,10 @@ export default async function EquipoPagosPage() {
               </div>
 
               {/* Comprobante */}
-              {p.comprobante_url && (
+              {comprobanteUrls.get(p.id) && (
                 <div className="px-4 pb-3">
                   <a
-                    href={p.comprobante_url}
+                    href={comprobanteUrls.get(p.id)}
                     target="_blank"
                     rel="noreferrer"
                     className="flex items-center gap-2 text-sm text-blue-600 underline"
@@ -102,23 +116,11 @@ export default async function EquipoPagosPage() {
               )}
 
               {/* Acciones */}
-              <div className="px-4 pb-4 flex gap-2">
-                <form action={verificarPago.bind(null, p.id, 'verificado') as unknown as () => Promise<void>} className="flex-1">
-                  <button
-                    type="submit"
-                    className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-xl py-2.5 transition-colors"
-                  >
-                    <CheckCircle2 size={15} /> Aprobar
-                  </button>
-                </form>
-                <form action={verificarPago.bind(null, p.id, 'rechazado') as unknown as () => Promise<void>} className="flex-1">
-                  <button
-                    type="submit"
-                    className="w-full flex items-center justify-center gap-2 bg-red-50 hover:bg-red-100 text-red-600 text-sm font-medium rounded-xl py-2.5 transition-colors border border-red-200"
-                  >
-                    <XCircle size={15} /> Rechazar
-                  </button>
-                </form>
+              <div className="px-4 pb-4">
+                <AccionesAprobarRechazar
+                  aprobar={verificarPago.bind(null, p.id, 'verificado')}
+                  rechazar={verificarPago.bind(null, p.id, 'rechazado')}
+                />
               </div>
             </div>
           )

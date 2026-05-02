@@ -11,6 +11,7 @@ import {
   Calendar,
   Upload,
   CalendarOff,
+  Sparkles,
 } from 'lucide-react'
 
 function formatCOP(value: number) {
@@ -55,7 +56,8 @@ export default async function DashboardPage() {
     .from('contratos')
     .select(`
       id, semanas_pagadas, semanas_aplazatorias, semanas_para_compra,
-      ahorro_acumulado, bonos_acumulados, primer_pago_fecha, estado,
+      ahorro_acumulado, bonos_acumulados, abonos_extras_acumulados,
+      primer_pago_fecha, estado, valor_comercial_acordado,
       vehiculos(marca, modelo, color, placa)
     `)
     .eq('conductor_id', conductor.id)
@@ -81,11 +83,16 @@ export default async function DashboardPage() {
   const semanasProcesadas = contrato.semanas_pagadas + contrato.semanas_aplazatorias
   const proximaFecha = addWeeks(primerPago, semanasProcesadas)
   const enMora = isPast(proximaFecha)
+  const abonosExtras = contrato.abonos_extras_acumulados ?? 0
+  const abonadoCompra =
+    contrato.ahorro_acumulado + contrato.bonos_acumulados + abonosExtras
+  const valorCompra = contrato.valor_comercial_acordado
+  const restanteCompra = Math.max(valorCompra - abonadoCompra, 0)
   const progreso = Math.min(
-    Math.round((contrato.semanas_pagadas / contrato.semanas_para_compra) * 100),
-    100
+    Math.round((abonadoCompra / valorCompra) * 100),
+    100,
   )
-  const semanasRestantes = contrato.semanas_para_compra - contrato.semanas_pagadas
+  const semanasRestantes = Math.ceil(restanteCompra / 200_000)
 
   // Latest payment status
   const { data: ultimoPago } = await supabase
@@ -109,6 +116,30 @@ export default async function DashboardPage() {
             {vehiculo.marca} {vehiculo.modelo} · {vehiculo.placa}
           </p>
         )}
+      </div>
+
+      {/* Progress bar — primera métrica que ve el conductor */}
+      <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="text-blue-500" size={18} />
+            <span className="text-sm font-medium text-gray-700">Progreso hacia la compra</span>
+          </div>
+          <span className="text-sm font-bold text-blue-600">{progreso}%</span>
+        </div>
+        <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-blue-500 rounded-full transition-all"
+            style={{ width: `${progreso}%` }}
+          />
+        </div>
+        <div className="mt-2 flex items-baseline justify-between">
+          <span className="text-sm font-semibold text-gray-900">{formatCOP(abonadoCompra)}</span>
+          <span className="text-xs text-gray-400">de {formatCOP(valorCompra)}</span>
+        </div>
+        <p className="text-xs text-gray-400 mt-1 text-center">
+          Te faltan {formatCOP(restanteCompra)} (incluye ahorro + bono)
+        </p>
       </div>
 
       {/* Mora alert */}
@@ -159,26 +190,6 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* Progress bar */}
-      <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="text-blue-500" size={18} />
-            <span className="text-sm font-medium text-gray-700">Progreso hacia la compra</span>
-          </div>
-          <span className="text-sm font-bold text-blue-600">{progreso}%</span>
-        </div>
-        <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-blue-500 rounded-full transition-all"
-            style={{ width: `${progreso}%` }}
-          />
-        </div>
-        <p className="text-xs text-gray-400 mt-2 text-center">
-          {contrato.semanas_pagadas} de {contrato.semanas_para_compra} semanas completadas
-        </p>
-      </div>
-
       {/* Último pago status */}
       {ultimoPago && ESTADOS_PAGO[ultimoPago.estado] && (
         <div className={`rounded-2xl p-4 flex gap-3 items-center ${ESTADOS_PAGO[ultimoPago.estado].color}`}>
@@ -210,6 +221,21 @@ export default async function DashboardPage() {
           <span className="text-sm font-medium text-center">Solicitar aplazatoria</span>
         </Link>
       </div>
+
+      <Link
+        href="/conductor/abono-extra"
+        className="flex items-center gap-3 bg-gradient-to-br from-purple-50 to-blue-50 hover:from-purple-100 hover:to-blue-100 border border-purple-100 rounded-2xl p-4 transition-colors"
+      >
+        <div className="bg-white rounded-xl p-2 shrink-0">
+          <Sparkles className="text-purple-500" size={22} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-gray-900">Abono extraordinario</p>
+          <p className="text-xs text-gray-500">
+            Adelanta pagos y reduce semanas
+          </p>
+        </div>
+      </Link>
     </div>
   )
 }

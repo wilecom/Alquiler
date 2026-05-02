@@ -48,14 +48,28 @@ export default function AplazatoriaPage() {
             </div>
           )}
 
-          <div className="text-center py-4">
+          <div className="text-center pt-2 pb-4">
             <CalendarOff className="mx-auto text-gray-300 mb-3" size={48} />
             <p className="text-gray-600 text-sm">
               Se solicitará aplazar el pago de la <strong>semana actual</strong>.
             </p>
-            <p className="text-gray-400 text-xs mt-2">
-              El equipo recibirá tu solicitud y te notificará.
-            </p>
+          </div>
+
+          <div className="space-y-1.5">
+            <label htmlFor="motivo" className="block text-sm font-medium text-gray-700">
+              Motivo de la solicitud
+            </label>
+            <textarea
+              id="motivo"
+              name="motivo"
+              required
+              minLength={3}
+              maxLength={200}
+              rows={3}
+              placeholder="Cuéntanos por qué necesitas aplazar esta semana"
+              className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-200 resize-none"
+            />
+            <p className="text-xs text-gray-400">El equipo verá este mensaje al revisar tu solicitud.</p>
           </div>
 
           <button

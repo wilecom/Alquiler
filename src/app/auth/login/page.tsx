@@ -15,7 +15,7 @@ export default function LoginPage() {
           <div className="bg-blue-600 rounded-2xl p-4 mb-4">
             <Car className="text-white" size={36} />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">AutoLeasing</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Auto Leasing Medellín</h1>
           <p className="text-gray-500 text-sm mt-1">Inicia sesión para continuar</p>
         </div>
 

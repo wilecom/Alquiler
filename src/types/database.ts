@@ -187,6 +187,7 @@ export type Database = {
           semanas_aplazatorias: number
           ahorro_acumulado: number
           bonos_acumulados: number
+          abonos_extras_acumulados: number
           estado: 'activo' | 'terminado' | 'comprado'
           fecha_terminacion: string | null
           created_at: string
@@ -205,6 +206,7 @@ export type Database = {
           semanas_aplazatorias?: number
           ahorro_acumulado?: number
           bonos_acumulados?: number
+          abonos_extras_acumulados?: number
           estado?: 'activo' | 'terminado' | 'comprado'
           fecha_terminacion?: string | null
           created_at?: string
@@ -231,7 +233,7 @@ export type Database = {
         Row: {
           id: string
           contrato_id: string
-          tipo: 'canon' | 'aplazatoria'
+          tipo: 'canon' | 'aplazatoria' | 'abono_extra'
           fecha_pago: string
           fecha_vencimiento: string
           monto: number
@@ -245,7 +247,7 @@ export type Database = {
         Insert: {
           id?: string
           contrato_id: string
-          tipo: 'canon' | 'aplazatoria'
+          tipo: 'canon' | 'aplazatoria' | 'abono_extra'
           fecha_pago: string
           fecha_vencimiento: string
           monto: number
@@ -365,6 +367,40 @@ export type Database = {
           }
         ]
       }
+      beneficios: {
+        Row: {
+          id: string
+          conductor_id: string
+          titulo: string
+          descripcion: string | null
+          activo: boolean
+          fecha_activacion: string
+          fecha_expiracion: string | null
+          activado_por: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          conductor_id: string
+          titulo: string
+          descripcion?: string | null
+          activo?: boolean
+          fecha_activacion?: string
+          fecha_expiracion?: string | null
+          activado_por?: string | null
+          created_at?: string
+        }
+        Update: Partial<Database['public']['Tables']['beneficios']['Insert']>
+        Relationships: [
+          {
+            foreignKeyName: 'beneficios_conductor_id_fkey'
+            columns: ['conductor_id']
+            isOneToOne: false
+            referencedRelation: 'conductores'
+            referencedColumns: ['id']
+          }
+        ]
+      }
     }
     Views: Record<string, never>
     Functions: Record<string, never>
@@ -383,3 +419,4 @@ export type Pago = Database['public']['Tables']['pagos']['Row']
 export type AplazatoriaSolicitud = Database['public']['Tables']['aplazatorias_solicitudes']['Row']
 export type Comparendo = Database['public']['Tables']['comparendos']['Row']
 export type Liquidacion = Database['public']['Tables']['liquidaciones']['Row']
+export type Beneficio = Database['public']['Tables']['beneficios']['Row']

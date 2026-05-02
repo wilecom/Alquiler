@@ -9,8 +9,13 @@ export type AplazatoriaState = { error: string } | { success: string } | null
 
 export async function solicitarAplazatoria(
   prevState: AplazatoriaState,
-  _formData: FormData
+  formData: FormData
 ): Promise<AplazatoriaState> {
+  const motivo = formData.get('motivo')?.toString().trim() ?? ''
+  if (motivo.length < 3 || motivo.length > 200) {
+    return { error: 'Cuéntanos el motivo (entre 3 y 200 caracteres).' }
+  }
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -67,6 +72,7 @@ export async function solicitarAplazatoria(
     contrato_id: contrato.id,
     semana_solicitada: semanaSolicitadaStr,
     estado: 'pendiente',
+    motivo,
   })
 
   if (insertError) {
@@ -80,7 +86,7 @@ export async function solicitarAplazatoria(
     nombre_conductor: conductor.nombre_completo,
     telefono_conductor: conductor.telefono,
     semana: semanasProcesadas + 1,
-    motivo: 'Solicitud nueva',
+    motivo,
   })
 
   return { success: '¡Solicitud enviada! El equipo la revisará pronto. Recuerda: la aplazatoria cuesta $200.000.' }

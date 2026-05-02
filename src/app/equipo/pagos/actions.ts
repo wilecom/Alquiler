@@ -2,13 +2,19 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { notify } from '@/lib/notifications/whatsapp'
+import { archivarPago } from '@/lib/archive'
 import { revalidatePath } from 'next/cache'
 
 export async function verificarPago(
   pagoId: string,
   decision: 'verificado' | 'rechazado',
-  motivo?: string,
+  formData: FormData,
 ) {
+  const motivo =
+    decision === 'rechazado'
+      ? formData.get('motivo')?.toString().trim() || undefined
+      : undefined
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
@@ -16,7 +22,7 @@ export async function verificarPago(
   const { data: pagoCtx } = await supabase
     .from('pagos')
     .select(
-      'contrato_id, tipo, monto, contratos(conductor_id, semanas_pagadas, semanas_aplazatorias, ahorro_acumulado, bonos_acumulados, conductores(nombre_completo, telefono))',
+      'contrato_id, tipo, monto, dias_mora, multa_mora, fecha_pago, comprobante_url, contratos(conductor_id, semanas_pagadas, semanas_aplazatorias, ahorro_acumulado, bonos_acumulados, abonos_extras_acumulados, conductores(nombre_completo, telefono, cedula), vehiculos(placa))',
     )
     .eq('id', pagoId)
     .single()
@@ -44,11 +50,22 @@ export async function verificarPago(
             ahorro_acumulado: contrato.ahorro_acumulado + 80000,
             bonos_acumulados: contrato.bonos_acumulados + 120000,
           }
-        : {
-            semanas_aplazatorias: contrato.semanas_aplazatorias + 1,
-          }
+        : pagoCtx.tipo === 'abono_extra'
+          ? {
+              abonos_extras_acumulados:
+                (contrato.abonos_extras_acumulados ?? 0) + pagoCtx.monto,
+            }
+          : {
+              semanas_aplazatorias: contrato.semanas_aplazatorias + 1,
+            }
     await supabase.from('contratos').update(updates).eq('id', pagoCtx.contrato_id)
   }
+
+  const vehiculo = contrato
+    ? Array.isArray(contrato.vehiculos)
+      ? contrato.vehiculos[0]
+      : contrato.vehiculos
+    : null
 
   if (conductor && contrato) {
     await notify({
@@ -61,6 +78,53 @@ export async function verificarPago(
       monto: pagoCtx.monto,
       decision,
       motivo,
+    })
+  }
+
+  if (decision === 'verificado' && conductor && contrato && vehiculo) {
+    const { data: agg } = await supabase
+      .from('pagos')
+      .select('monto, multa_mora')
+      .eq('contrato_id', pagoCtx.contrato_id)
+      .eq('estado', 'verificado')
+    const ingresoAcumulado = (agg ?? []).reduce((s, r) => s + (r.monto ?? 0), 0)
+    const gastosAcumulado = (agg ?? []).reduce((s, r) => s + (r.multa_mora ?? 0), 0)
+
+    const { data: contratoFull } = await supabase
+      .from('contratos')
+      .select('valor_comercial_acordado, semanas_pagadas')
+      .eq('id', pagoCtx.contrato_id)
+      .single()
+
+    const rawUrl = pagoCtx.comprobante_url ?? ''
+    const comprobantePath = rawUrl.startsWith('http')
+      ? rawUrl.split('/comprobantes/')[1] ?? ''
+      : rawUrl
+    let comprobanteSignedUrl = rawUrl
+    if (comprobantePath) {
+      const { data: signed } = await supabase.storage
+        .from('comprobantes')
+        .createSignedUrl(comprobantePath, 60 * 60 * 24)
+      if (signed?.signedUrl) comprobanteSignedUrl = signed.signedUrl
+    }
+
+    await archivarPago({
+      contrato_id: pagoCtx.contrato_id,
+      nombre_conductor: conductor.nombre_completo,
+      cedula: conductor.cedula,
+      placa: vehiculo.placa,
+      semana: contrato.semanas_pagadas + (pagoCtx.tipo === 'canon' ? 1 : 0),
+      tipo: pagoCtx.tipo,
+      monto: pagoCtx.monto,
+      dias_mora: pagoCtx.dias_mora ?? 0,
+      multa_mora: pagoCtx.multa_mora ?? 0,
+      fecha_pago: pagoCtx.fecha_pago,
+      comprobante_url: comprobanteSignedUrl,
+      aprobado_por: user.email ?? user.id,
+      ingreso_acumulado: ingresoAcumulado,
+      gastos_acumulado: gastosAcumulado,
+      costo_vehiculo: contratoFull?.valor_comercial_acordado ?? 0,
+      semanas_pagadas: contratoFull?.semanas_pagadas ?? 0,
     })
   }
 

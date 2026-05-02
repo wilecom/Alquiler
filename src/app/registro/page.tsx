@@ -26,7 +26,7 @@ export default function RegistroPage() {
       <header className="bg-gray-900 text-white px-4 py-4 text-center">
         <div className="flex items-center justify-center gap-2 mb-1">
           <Car size={20} />
-          <span className="font-bold text-lg">AutoLeasing</span>
+          <span className="font-bold text-lg">Auto Leasing Medellín</span>
         </div>
         <p className="text-gray-400 text-sm">Formulario de postulación</p>
       </header>

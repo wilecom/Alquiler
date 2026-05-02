@@ -1,0 +1,262 @@
+{
+  "name": "Leasing - Pago Archivado (Drive + Sheet)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "pago-archivado",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "wh-pa-001",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [240, 300],
+      "webhookId": "pago-archivado"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {"id":"a1","name":"contrato_id","value":"={{ $json.body.contrato_id }}","type":"string"},
+            {"id":"a2","name":"conductor_nombre","value":"={{ $json.body.nombre_conductor }}","type":"string"},
+            {"id":"a3","name":"conductor_cedula","value":"={{ $json.body.cedula }}","type":"string"},
+            {"id":"a4","name":"placa","value":"={{ $json.body.placa }}","type":"string"},
+            {"id":"a4b","name":"placa_normalizada","value":"={{ ($json.body.placa || '').replace(/\\s+/g,'').toUpperCase() }}","type":"string"},
+            {"id":"a4c","name":"apodo","value":"={{ $json.body.apodo || '' }}","type":"string"},
+            {"id":"a5","name":"semana","value":"={{ $json.body.semana }}","type":"number"},
+            {"id":"a6","name":"tipo","value":"={{ $json.body.tipo }}","type":"string"},
+            {"id":"a7","name":"monto","value":"={{ $json.body.monto }}","type":"number"},
+            {"id":"a8","name":"dias_mora","value":"={{ $json.body.dias_mora || 0 }}","type":"number"},
+            {"id":"a9","name":"multa_mora","value":"={{ $json.body.multa_mora || 0 }}","type":"number"},
+            {"id":"a10","name":"fecha_pago","value":"={{ $json.body.fecha_pago }}","type":"string"},
+            {"id":"a11","name":"comprobante_url","value":"={{ $json.body.comprobante_url }}","type":"string"},
+            {"id":"a12","name":"aprobado_por","value":"={{ $json.body.aprobado_por }}","type":"string"},
+            {"id":"a13","name":"fecha_aprobacion","value":"={{ new Date().toISOString() }}","type":"string"},
+            {"id":"a14","name":"file_name","value":"={{ $json.body.fecha_pago + '_semana' + $json.body.semana + '_' + $json.body.tipo + '.' + ($json.body.comprobante_url.split('.').pop() || 'jpg') }}","type":"string"},
+            {"id":"a15","name":"ingreso_acumulado","value":"={{ $json.body.ingreso_acumulado || 0 }}","type":"number"},
+            {"id":"a16","name":"gastos_acumulado","value":"={{ $json.body.gastos_acumulado || 0 }}","type":"number"},
+            {"id":"a17","name":"costo_vehiculo","value":"={{ $json.body.costo_vehiculo || 0 }}","type":"number"},
+            {"id":"a18","name":"semanas_pagadas","value":"={{ $json.body.semanas_pagadas || 0 }}","type":"number"},
+            {"id":"a19","name":"ganancia","value":"={{ ($json.body.ingreso_acumulado || 0) - ($json.body.costo_vehiculo || 0) }}","type":"number"},
+            {"id":"a20","name":"ficha_sheet","value":"={{ $json.body.ficha_sheet || '' }}","type":"string"},
+            {"id":"a21","name":"mes_pago","value":"={{ $json.body.mes_pago || '' }}","type":"string"},
+            {"id":"a22","name":"fila_c1","value":"={{ 20 + ($json.body.semana || 0) }}","type":"number"},
+            {"id":"a23","name":"comprobantes_folder_id","value":"={{ $json.body.comprobantes_folder_id || '1iS7-imv_On0qfWCdUjkfFvagXgKyE6CC' }}","type":"string"}
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-pa-001",
+      "name": "Estructurar datos",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $json.comprobante_url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "http-pa-download",
+      "name": "Descargar comprobante",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "name": "={{ $('Estructurar datos').item.json.file_name }}",
+        "driveId": {"mode":"list","value":"My Drive"},
+        "folderId": {"mode":"id","value":"={{ $('Estructurar datos').item.json.comprobantes_folder_id }}"},
+        "options": {}
+      },
+      "id": "gd-pa-upload",
+      "name": "Subir a Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [900, 300],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "jYYEfs7rYpcv5UXX",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {"mode":"id","value":"1iz-2lCGd9ZgHWEmfQK0UWV6q6voDgxU0TNVY6kexaJ0"},
+        "sheetName": {"mode":"name","value":"Log de Pagos - Leasing"},
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "fecha_pago": "={{ $('Estructurar datos').item.json.fecha_pago }}",
+            "placa": "={{ $('Estructurar datos').item.json.placa }}",
+            "conductor": "={{ $('Estructurar datos').item.json.conductor_nombre }}",
+            "cedula": "={{ $('Estructurar datos').item.json.conductor_cedula }}",
+            "tipo": "={{ $('Estructurar datos').item.json.tipo }}",
+            "semana": "={{ $('Estructurar datos').item.json.semana }}",
+            "monto": "={{ $('Estructurar datos').item.json.monto }}",
+            "dias_mora": "={{ $('Estructurar datos').item.json.dias_mora }}",
+            "multa_mora": "={{ $('Estructurar datos').item.json.multa_mora }}",
+            "total": "={{ $('Estructurar datos').item.json.monto + $('Estructurar datos').item.json.multa_mora }}",
+            "aprobado_por": "={{ $('Estructurar datos').item.json.aprobado_por }}",
+            "fecha_aprobacion": "={{ $('Estructurar datos').item.json.fecha_aprobacion }}",
+            "url_drive": "={{ $('Subir a Drive').item.json.webViewLink }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {"id":"fecha_pago","displayName":"fecha_pago","type":"string"},
+            {"id":"placa","displayName":"placa","type":"string"},
+            {"id":"conductor","displayName":"conductor","type":"string"},
+            {"id":"cedula","displayName":"cedula","type":"string"},
+            {"id":"tipo","displayName":"tipo","type":"string"},
+            {"id":"semana","displayName":"semana","type":"number"},
+            {"id":"monto","displayName":"monto","type":"number"},
+            {"id":"dias_mora","displayName":"dias_mora","type":"number"},
+            {"id":"multa_mora","displayName":"multa_mora","type":"number"},
+            {"id":"total","displayName":"total","type":"number"},
+            {"id":"aprobado_por","displayName":"aprobado_por","type":"string"},
+            {"id":"fecha_aprobacion","displayName":"fecha_aprobacion","type":"string"},
+            {"id":"url_drive","displayName":"url_drive","type":"string"}
+          ]
+        },
+        "options": {}
+      },
+      "id": "gs-pa-append",
+      "name": "Append a Log de Pagos",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1120, 300],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "BtZYscMPiRmygcZq",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {"mode":"id","value":"1GP-Z7rzuVGh4ZElx-ymMZ3auVjpv1wI2EVUAa7Dh8Xo"},
+        "sheetName": {"mode":"name","value":"Principal"},
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "PLACA": "={{ $('Estructurar datos').item.json.placa_normalizada }}",
+            "APODO": "={{ $('Estructurar datos').item.json.apodo }}",
+            "INGRESO": "={{ $('Estructurar datos').item.json.ingreso_acumulado }}",
+            "GASTOS": "={{ $('Estructurar datos').item.json.gastos_acumulado }}",
+            "SEMANA ": "={{ $('Estructurar datos').item.json.semanas_pagadas }}",
+            "GANANCIA": "={{ $('Estructurar datos').item.json.ganancia }}"
+          },
+          "matchingColumns": ["PLACA"],
+          "schema": [
+            {"id":"#","displayName":"#","type":"string","canBeUsedToMatch":false},
+            {"id":"PAGINA","displayName":"PAGINA","type":"string","canBeUsedToMatch":false},
+            {"id":"APODO","displayName":"APODO","type":"string","canBeUsedToMatch":false},
+            {"id":"PLACA","displayName":"PLACA","type":"string","canBeUsedToMatch":true},
+            {"id":"COSTO M","displayName":"COSTO M","type":"string","canBeUsedToMatch":false},
+            {"id":"F ENTREGA ","displayName":"F ENTREGA ","type":"string","canBeUsedToMatch":false},
+            {"id":"REFERENCIA","displayName":"REFERENCIA","type":"string","canBeUsedToMatch":false},
+            {"id":"INGRESO","displayName":"INGRESO","type":"number","canBeUsedToMatch":false},
+            {"id":"GASTOS","displayName":"GASTOS","type":"number","canBeUsedToMatch":false},
+            {"id":"SEMANA ","displayName":"SEMANA ","type":"number","canBeUsedToMatch":false},
+            {"id":"GANANCIA","displayName":"GANANCIA","type":"number","canBeUsedToMatch":false},
+            {"id":"SOAT","displayName":"SOAT","type":"string","canBeUsedToMatch":false},
+            {"id":"TECNO","displayName":"TECNO","type":"string","canBeUsedToMatch":false},
+            {"id":"INVERSIÓN TOTAL","displayName":"INVERSIÓN TOTAL","type":"string","canBeUsedToMatch":false},
+            {"id":"INGRESO TOTAL","displayName":"INGRESO TOTAL","type":"string","canBeUsedToMatch":false},
+            {"id":"UTILIDAD","displayName":"UTILIDAD","type":"string","canBeUsedToMatch":false}
+          ]
+        },
+        "options": {}
+      },
+      "id": "gs-pa-principal",
+      "name": "Actualizar Principal",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1340, 300],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "BtZYscMPiRmygcZq",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict"},
+          "conditions": [
+            {"id":"if-1","leftValue":"={{ $('Estructurar datos').item.json.ficha_sheet }}","rightValue":"","operator":{"type":"string","operation":"notEmpty","singleValue":true}},
+            {"id":"if-2","leftValue":"={{ $('Estructurar datos').item.json.tipo }}","rightValue":"canon","operator":{"type":"string","operation":"equals"}},
+            {"id":"if-3","leftValue":"={{ $('Estructurar datos').item.json.semana }}","rightValue":1,"operator":{"type":"number","operation":"gte"}}
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-pa-c1",
+      "name": "Tiene ficha C1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1560, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://sheets.googleapis.com/v4/spreadsheets/1GP-Z7rzuVGh4ZElx-ymMZ3auVjpv1wI2EVUAa7Dh8Xo/values:batchUpdate",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ valueInputOption: 'USER_ENTERED', data: [ { range: $('Estructurar datos').item.json.ficha_sheet + '!D' + $('Estructurar datos').item.json.fila_c1, values: [[ $('Estructurar datos').item.json.mes_pago ]] }, { range: $('Estructurar datos').item.json.ficha_sheet + '!E' + $('Estructurar datos').item.json.fila_c1, values: [[ $('Estructurar datos').item.json.fecha_pago ]] }, { range: $('Estructurar datos').item.json.ficha_sheet + '!F' + $('Estructurar datos').item.json.fila_c1, values: [[ $('Estructurar datos').item.json.monto ]] }, { range: $('Estructurar datos').item.json.ficha_sheet + '!G' + $('Estructurar datos').item.json.fila_c1, values: [[ $('Estructurar datos').item.json.multa_mora ]] }, { range: $('Estructurar datos').item.json.ficha_sheet + '!I' + $('Estructurar datos').item.json.fila_c1, values: [[ 80000 ]] }, { range: $('Estructurar datos').item.json.ficha_sheet + '!J' + $('Estructurar datos').item.json.fila_c1, values: [[ 120000 ]] } ] }) }}",
+        "options": {}
+      },
+      "id": "http-pa-c1",
+      "name": "Update Ficha C1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1780, 220],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "BtZYscMPiRmygcZq",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: true, drive_url: $('Subir a Drive').item.json.webViewLink, file_id: $('Subir a Drive').item.json.id, principal_updated: true, ficha_updated: $('Estructurar datos').item.json.ficha_sheet || null, fila_c1: $('Estructurar datos').item.json.fila_c1 } }}",
+        "options": {}
+      },
+      "id": "respond-pa",
+      "name": "Responder OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [2000, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {"main":[[{"node":"Estructurar datos","type":"main","index":0}]]},
+    "Estructurar datos": {"main":[[{"node":"Descargar comprobante","type":"main","index":0}]]},
+    "Descargar comprobante": {"main":[[{"node":"Subir a Drive","type":"main","index":0}]]},
+    "Subir a Drive": {"main":[[{"node":"Append a Log de Pagos","type":"main","index":0}]]},
+    "Append a Log de Pagos": {"main":[[{"node":"Actualizar Principal","type":"main","index":0}]]},
+    "Actualizar Principal": {"main":[[{"node":"Tiene ficha C1","type":"main","index":0}]]},
+    "Tiene ficha C1": {"main":[[{"node":"Update Ficha C1","type":"main","index":0}],[{"node":"Responder OK","type":"main","index":0}]]},
+    "Update Ficha C1": {"main":[[{"node":"Responder OK","type":"main","index":0}]]}
+  },
+  "settings": {"executionOrder": "v1"}
+}
