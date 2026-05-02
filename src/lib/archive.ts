@@ -5,11 +5,13 @@ const N8N_BASE = process.env.N8N_BASE_URL ?? 'https://primary-production-7a21b.u
 const FICHA_POR_PLACA: Record<string, string> = {
   'KAO710': 'C1',
   'KAO 710': 'C1',
+  'TST123': 'C2',
 }
 
 const COMPROBANTES_FOLDER_POR_PLACA: Record<string, string> = {
   'KAO710': '1z7qeplKWKGc0Cm_VQhVr6mUZ2Lo8S1L-',
   'KAO 710': '1z7qeplKWKGc0Cm_VQhVr6mUZ2Lo8S1L-',
+  'TST123': '1ois4SY31VTz8iAuVT9XoODx1h8-t0fcI',
 }
 
 const MESES_ES = [
