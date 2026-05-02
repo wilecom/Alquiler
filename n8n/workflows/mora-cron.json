@@ -16,7 +16,10 @@
       "name": "Diario 9am Bogotá",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.1,
-      "position": [240, 300]
+      "position": [
+        240,
+        300
+      ]
     },
     {
       "parameters": {
@@ -39,24 +42,16 @@
       "name": "Supabase - Pagos en mora",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [460, 300],
+      "position": [
+        460,
+        300
+      ],
       "credentials": {
         "httpHeaderAuth": {
           "id": "1Lhy6PNC90ObruJX",
           "name": "Supabase Leasing (service_role)"
         }
       }
-    },
-    {
-      "parameters": {
-        "fieldToSplitOut": "data",
-        "options": {}
-      },
-      "id": "split-001",
-      "name": "Por cada pago",
-      "type": "n8n-nodes-base.splitOut",
-      "typeVersion": 1,
-      "position": [680, 300]
     },
     {
       "parameters": {
@@ -100,7 +95,10 @@
       "name": "Calcular días/multa",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [900, 300]
+      "position": [
+        900,
+        300
+      ]
     },
     {
       "parameters": {
@@ -130,7 +128,10 @@
       "name": "Mora <= 5 días",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [1120, 300]
+      "position": [
+        1120,
+        300
+      ]
     },
     {
       "parameters": {
@@ -147,7 +148,10 @@
       "name": "Meta - Mensaje Conductor",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1340, 220],
+      "position": [
+        1340,
+        220
+      ],
       "credentials": {
         "httpHeaderAuth": {
           "id": "DhiQkTptuaot52II",
@@ -183,7 +187,10 @@
       "name": "Día == 3 (alertar equipo)",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [1560, 220]
+      "position": [
+        1560,
+        220
+      ]
     },
     {
       "parameters": {
@@ -200,7 +207,10 @@
       "name": "Meta - Alerta Equipo",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1780, 220],
+      "position": [
+        1780,
+        220
+      ],
       "credentials": {
         "httpHeaderAuth": {
           "id": "DhiQkTptuaot52II",
@@ -211,32 +221,69 @@
   ],
   "connections": {
     "Diario 9am Bogotá": {
-      "main": [[{"node": "Supabase - Pagos en mora", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Supabase - Pagos en mora",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Supabase - Pagos en mora": {
-      "main": [[{"node": "Por cada pago", "type": "main", "index": 0}]]
-    },
-    "Por cada pago": {
-      "main": [[{"node": "Calcular días/multa", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Calcular días/multa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Calcular días/multa": {
-      "main": [[{"node": "Mora <= 5 días", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Mora <= 5 días",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Mora <= 5 días": {
       "main": [
-        [{"node": "Meta - Mensaje Conductor", "type": "main", "index": 0}],
+        [
+          {
+            "node": "Meta - Mensaje Conductor",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Día == 3 (alertar equipo)",
+            "type": "main",
+            "index": 0
+          }
+        ],
         []
       ]
     },
-    "Meta - Mensaje Conductor": {
-      "main": [[{"node": "Día == 3 (alertar equipo)", "type": "main", "index": 0}]]
-    },
     "Día == 3 (alertar equipo)": {
       "main": [
-        [{"node": "Meta - Alerta Equipo", "type": "main", "index": 0}],
+        [
+          {
+            "node": "Meta - Alerta Equipo",
+            "type": "main",
+            "index": 0
+          }
+        ],
         []
       ]
     }
   },
-  "settings": {"executionOrder": "v1"}
+  "settings": {
+    "executionOrder": "v1"
+  }
 }
