@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { CheckCircle2, XCircle } from 'lucide-react'
 
-type Action = (fd: FormData) => Promise<unknown>
+type Action = (fd: FormData) => Promise<void> | Promise<unknown>
 
 export function AccionesAprobarRechazar({
   aprobar,
@@ -22,7 +22,7 @@ export function AccionesAprobarRechazar({
 
   if (modo === 'rechazo') {
     return (
-      <form action={rechazar} className="w-full space-y-2">
+      <form action={rechazar as (fd: FormData) => Promise<void>} className="w-full space-y-2">
         <textarea
           name="motivo"
           required
@@ -53,7 +53,7 @@ export function AccionesAprobarRechazar({
 
   return (
     <div className="flex gap-2 w-full">
-      <form action={aprobar} className="flex-1">
+      <form action={aprobar as (fd: FormData) => Promise<void>} className="flex-1">
         <button
           type="submit"
           className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-xl py-2.5 transition-colors"

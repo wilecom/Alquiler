@@ -276,6 +276,7 @@ export type Database = {
           semana_solicitada: string
           estado: 'pendiente' | 'aprobada' | 'rechazada'
           revisado_por: string | null
+          motivo: string | null
           created_at: string
         }
         Insert: {
@@ -284,6 +285,7 @@ export type Database = {
           semana_solicitada: string
           estado?: 'pendiente' | 'aprobada' | 'rechazada'
           revisado_por?: string | null
+          motivo?: string | null
           created_at?: string
         }
         Update: Partial<Database['public']['Tables']['aplazatorias_solicitudes']['Insert']>
