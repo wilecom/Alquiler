@@ -132,12 +132,15 @@ export default async function DashboardPage() {
             style={{ width: `${progreso}%` }}
           />
         </div>
-        <div className="mt-2 flex items-baseline justify-between">
-          <span className="text-sm font-semibold text-gray-900">{formatCOP(abonadoCompra)}</span>
-          <span className="text-xs text-gray-400">de {formatCOP(valorCompra)}</span>
-        </div>
-        <p className="text-xs text-gray-400 mt-1 text-center">
-          Te faltan {formatCOP(restanteCompra)} (incluye ahorro + bono)
+        <p className="text-sm text-gray-700 mt-3 text-center">
+          ¡Felicidades, {nombre}! Llevas un <span className="font-semibold text-blue-600">{progreso}%</span> de tu compra
+        </p>
+        <p className="text-xs text-gray-400 mt-1 text-center">Te faltan</p>
+        <p className="text-3xl font-bold text-gray-900 text-center leading-tight">
+          {formatCOP(restanteCompra)}
+        </p>
+        <p className="text-xs text-gray-500 mt-3 text-center leading-relaxed">
+          Recuerda que puedes hacer abonos extraordinarios y acortar este tiempo. ¡Ánimo!
         </p>
       </div>
 

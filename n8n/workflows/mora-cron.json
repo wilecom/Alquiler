@@ -5,26 +5,32 @@
       "parameters": {
         "rule": {
           "interval": [
-            {"field": "cronExpression", "expression": "0 14 * * *"}
+            {
+              "field": "cronExpression",
+              "expression": "0 14 * * *"
+            }
           ]
         }
       },
       "id": "sched-mora",
       "name": "Diario 9am Bogotá",
       "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
+      "typeVersion": 1.1,
       "position": [240, 300]
     },
     {
       "parameters": {
         "method": "GET",
-        "url": "=https://nyqzwlawchvvqnwwopxc.supabase.co/rest/v1/pagos?select=id,contrato_id,monto,fecha_vencimiento,contratos(conductor_id,conductores(nombre_completo,telefono))&estado=eq.pendiente&fecha_vencimiento=lt.{{ $now.format('yyyy-MM-dd') }}&order=fecha_vencimiento.asc",
+        "url": "=https://nyqzwlawchvvqnwwopxc.supabase.co/rest/v1/pagos?select=id,contrato_id,monto,fecha_vencimiento,contratos(conductor_id,vehiculos(placa),conductores(nombre_completo,telefono))&estado=eq.pendiente&fecha_vencimiento=lt.{{ $now.format('yyyy-MM-dd') }}&order=fecha_vencimiento.asc",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            {"name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_ROLE_KEY }}"}
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55cXp3bGF3Y2h2dnFud3dvcHhjIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NzQyNzM2MSwiZXhwIjoyMDkzMDAzMzYxfQ.497m4yMeegxFzqnsedfsDTx_vilVjkxUtZCX-z0iBZY"
+            }
           ]
         },
         "options": {}
@@ -56,10 +62,36 @@
       "parameters": {
         "assignments": {
           "assignments": [
-            {"id": "m1", "name": "telefono", "value": "={{ $json.contratos.conductores.telefono }}", "type": "string"},
-            {"id": "m2", "name": "nombre", "value": "={{ $json.contratos.conductores.nombre_completo }}", "type": "string"},
-            {"id": "m3", "name": "dias_mora", "value": "={{ Math.ceil((new Date() - new Date($json.fecha_vencimiento)) / 86400000) }}", "type": "number"},
-            {"id": "m4", "name": "multa", "value": "={{ Math.ceil((new Date() - new Date($json.fecha_vencimiento)) / 86400000) * 5000 }}", "type": "number"}
+            {
+              "id": "m1",
+              "name": "telefono",
+              "value": "={{ $json.contratos.conductores.telefono }}",
+              "type": "string"
+            },
+            {
+              "id": "m2",
+              "name": "nombre",
+              "value": "={{ $json.contratos.conductores.nombre_completo }}",
+              "type": "string"
+            },
+            {
+              "id": "m3",
+              "name": "dias_mora",
+              "value": "={{ Math.ceil((new Date() - new Date($json.fecha_vencimiento)) / 86400000) }}",
+              "type": "number"
+            },
+            {
+              "id": "m4",
+              "name": "multa",
+              "value": "={{ Math.ceil((new Date() - new Date($json.fecha_vencimiento)) / 86400000) * 5000 }}",
+              "type": "number"
+            },
+            {
+              "id": "m5",
+              "name": "placa",
+              "value": "={{ $json.contratos.vehiculos.placa }}",
+              "type": "string"
+            }
           ]
         },
         "options": {}
@@ -72,23 +104,106 @@
     },
     {
       "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.dias_mora }}",
+              "rightValue": 5,
+              "operator": {
+                "type": "number",
+                "operation": "lte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-day-leq5",
+      "name": "Mora <= 5 días",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
         "method": "POST",
         "url": "=https://graph.facebook.com/v25.0/1055022657703124/messages",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"messaging_product\": \"whatsapp\",\n  \"to\": \"{{ $json.telefono }}\",\n  \"type\": \"template\",\n  \"template\": {\n    \"name\": \"recordatorio_mora\",\n    \"language\": { \"code\": \"es\" },\n    \"components\": [\n      {\n        \"type\": \"body\",\n        \"parameters\": [\n          { \"type\": \"text\", \"text\": \"{{ $json.nombre }}\" },\n          { \"type\": \"text\", \"text\": \"{{ $json.dias_mora }}\" },\n          { \"type\": \"text\", \"text\": \"{{ $json.multa }}\" }\n        ]\n      }\n    ]\n  }\n}",
+        "jsonBody": "={{ JSON.stringify({ messaging_product: 'whatsapp', to: $json.telefono, type: 'template', template: { name: $json.dias_mora === 3 ? 'mora_dia_3_critico' : $json.dias_mora === 5 ? 'mora_dia_5_ultimo' : 'recordatorio_mora', language: { code: 'es' }, components: [{ type: 'body', parameters: ($json.dias_mora === 3 || $json.dias_mora === 5) ? [{ type: 'text', text: String($json.nombre) }, { type: 'text', text: String($json.multa) }] : [{ type: 'text', text: String($json.nombre) }, { type: 'text', text: String($json.dias_mora) }, { type: 'text', text: String($json.multa) }] }] } }) }}",
         "options": {}
       },
       "id": "http-meta-mora",
-      "name": "Meta - Recordatorio Conductor",
+      "name": "Meta - Mensaje Conductor",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1120, 300],
+      "position": [1340, 220],
       "credentials": {
         "httpHeaderAuth": {
-          "id": "ny3omGtGvljUDlzd",
+          "id": "DhiQkTptuaot52II",
+          "name": "Meta WhatsApp API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c2",
+              "leftValue": "={{ $json.dias_mora }}",
+              "rightValue": 3,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-day3",
+      "name": "Día == 3 (alertar equipo)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1560, 220]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v25.0/1055022657703124/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ messaging_product: 'whatsapp', to: '573044903559', type: 'template', template: { name: 'equipo_alerta_mora', language: { code: 'es' }, components: [{ type: 'body', parameters: [{ type: 'text', text: String($json.nombre) }, { type: 'text', text: String($json.placa) }, { type: 'text', text: String($json.multa) }] }] } }) }}",
+        "options": {}
+      },
+      "id": "http-meta-equipo",
+      "name": "Meta - Alerta Equipo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1780, 220],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "DhiQkTptuaot52II",
           "name": "Meta WhatsApp API"
         }
       }
@@ -105,7 +220,22 @@
       "main": [[{"node": "Calcular días/multa", "type": "main", "index": 0}]]
     },
     "Calcular días/multa": {
-      "main": [[{"node": "Meta - Recordatorio Conductor", "type": "main", "index": 0}]]
+      "main": [[{"node": "Mora <= 5 días", "type": "main", "index": 0}]]
+    },
+    "Mora <= 5 días": {
+      "main": [
+        [{"node": "Meta - Mensaje Conductor", "type": "main", "index": 0}],
+        []
+      ]
+    },
+    "Meta - Mensaje Conductor": {
+      "main": [[{"node": "Día == 3 (alertar equipo)", "type": "main", "index": 0}]]
+    },
+    "Día == 3 (alertar equipo)": {
+      "main": [
+        [{"node": "Meta - Alerta Equipo", "type": "main", "index": 0}],
+        []
+      ]
     }
   },
   "settings": {"executionOrder": "v1"}
