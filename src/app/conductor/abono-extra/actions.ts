@@ -3,27 +3,21 @@
 import { createClient } from '@/lib/supabase/server'
 import { notify } from '@/lib/notifications/whatsapp'
 import { redirect } from 'next/navigation'
-import { z } from 'zod'
 
-export type AbonoState = { error: string } | { success: string } | null
+export type AbonoState = { error: string } | { success: string }
 
-const Schema = z.object({
-  monto: z.coerce.number().int().positive({ error: 'El monto debe ser mayor a 0.' }),
-})
-
-export async function subirAbonoExtra(
-  _prev: AbonoState,
-  formData: FormData,
-): Promise<AbonoState> {
+export async function subirAbonoExtra(args: {
+  path: string
+  monto: number
+}): Promise<AbonoState> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 
-  const parsed = Schema.safeParse({ monto: formData.get('monto') })
-  if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? 'Monto inválido.' }
+  const monto = Math.floor(args.monto)
+  if (!Number.isFinite(monto) || monto <= 0) {
+    return { error: 'Monto inválido.' }
   }
-  const monto = parsed.data.monto
 
   const { data: conductor } = await supabase
     .from('conductores')
@@ -40,6 +34,10 @@ export async function subirAbonoExtra(
     .maybeSingle()
   if (!contrato) return { error: 'No tienes un contrato activo.' }
 
+  if (!args.path || !args.path.startsWith(`${contrato.id}/`)) {
+    return { error: 'Ruta de archivo inválida.' }
+  }
+
   const restante =
     contrato.valor_comercial_acordado -
     (contrato.ahorro_acumulado + contrato.bonos_acumulados + contrato.abonos_extras_acumulados)
@@ -47,26 +45,6 @@ export async function subirAbonoExtra(
   if (monto > restante) {
     return { error: `El monto supera el saldo restante (${restante.toLocaleString('es-CO')} COP).` }
   }
-
-  const file = formData.get('comprobante') as File
-  if (!file || file.size === 0) {
-    return { error: 'Selecciona el comprobante de pago.' }
-  }
-  if (file.size > 10 * 1024 * 1024) {
-    return { error: 'El archivo no puede superar 10 MB.' }
-  }
-  const allowed = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf']
-  if (!allowed.includes(file.type)) {
-    return { error: 'Solo se aceptan imágenes (JPG, PNG, WEBP) o PDF.' }
-  }
-
-  const ext = file.name.split('.').pop() ?? 'jpg'
-  const fileName = `${contrato.id}/abono_${Date.now()}.${ext}`
-  const buffer = await file.arrayBuffer()
-  const { error: upErr } = await supabase.storage
-    .from('comprobantes')
-    .upload(fileName, buffer, { contentType: file.type, upsert: false })
-  if (upErr) return { error: 'Error al subir el archivo.' }
 
   const hoy = new Date().toISOString().split('T')[0]
 
@@ -76,16 +54,16 @@ export async function subirAbonoExtra(
     fecha_pago: hoy,
     fecha_vencimiento: hoy,
     monto,
-    comprobante_url: fileName,
+    comprobante_url: args.path,
     estado: 'comprobante_subido',
   })
   if (pagoErr) return { error: 'Error al registrar el abono.' }
 
   const { data: signed } = await supabase.storage
     .from('comprobantes')
-    .createSignedUrl(fileName, 60 * 60 * 24 * 7)
+    .createSignedUrl(args.path, 60 * 60 * 24 * 7)
 
-  await notify({
+  notify({
     event: 'comprobante.subido',
     conductor_id: conductor.id,
     contrato_id: contrato.id,
@@ -93,9 +71,9 @@ export async function subirAbonoExtra(
     telefono_conductor: conductor.telefono,
     semana: 0,
     monto,
-    comprobante_url: signed?.signedUrl ?? fileName,
+    comprobante_url: signed?.signedUrl ?? args.path,
     fecha_pago: hoy,
-  })
+  }).catch(() => {})
 
   return { success: '¡Abono extra enviado! El equipo lo revisará pronto.' }
 }
