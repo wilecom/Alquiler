@@ -139,8 +139,15 @@ export default async function DashboardPage() {
         <p className="text-3xl font-bold text-gray-900 text-center leading-tight">
           {formatCOP(restanteCompra)}
         </p>
-        <p className="text-xs text-gray-500 mt-3 text-center leading-relaxed">
-          Recuerda que puedes hacer abonos extraordinarios y acortar este tiempo. ¡Ánimo!
+        <Link
+          href="/conductor/abono-extra"
+          className="mt-4 flex items-center justify-center gap-2 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white rounded-xl py-3 px-4 font-semibold text-sm shadow-md hover:shadow-lg transition-all"
+        >
+          <Sparkles size={18} />
+          <span>Hacer abono extraordinario</span>
+        </Link>
+        <p className="text-xs text-gray-400 mt-2 text-center leading-relaxed">
+          Adelanta pagos y acorta el tiempo hacia tu compra
         </p>
       </div>
 
@@ -214,20 +221,6 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
-      <Link
-        href="/conductor/abono-extra"
-        className="flex items-center gap-3 bg-gradient-to-br from-purple-50 to-blue-50 hover:from-purple-100 hover:to-blue-100 border border-purple-100 rounded-2xl p-4 transition-colors"
-      >
-        <div className="bg-white rounded-xl p-2 shrink-0">
-          <Sparkles className="text-purple-500" size={22} />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-gray-900">Abono extraordinario</p>
-          <p className="text-xs text-gray-500">
-            Adelanta pagos y reduce semanas
-          </p>
-        </div>
-      </Link>
     </div>
   )
 }
