@@ -92,7 +92,6 @@ export default async function DashboardPage() {
     Math.round((abonadoCompra / valorCompra) * 100),
     100,
   )
-  const semanasRestantes = Math.ceil(restanteCompra / 200_000)
 
   // Latest payment status
   const { data: ultimoPago } = await supabase
@@ -170,16 +169,6 @@ export default async function DashboardPage() {
 
       {/* Stats grid */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-          <p className="text-xs text-gray-400 mb-1">Semanas pagadas</p>
-          <p className="text-2xl font-bold text-gray-900">{contrato.semanas_pagadas}</p>
-          <p className="text-xs text-gray-400">de {contrato.semanas_para_compra}</p>
-        </div>
-        <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-          <p className="text-xs text-gray-400 mb-1">Semanas restantes</p>
-          <p className="text-2xl font-bold text-gray-900">{semanasRestantes}</p>
-          <p className="text-xs text-gray-400">para la opción de compra</p>
-        </div>
         <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
           <p className="text-xs text-gray-400 mb-1">Ahorro acumulado</p>
           <p className="text-lg font-bold text-green-600">{formatCOP(contrato.ahorro_acumulado)}</p>
