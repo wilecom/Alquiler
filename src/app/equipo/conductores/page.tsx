@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import { format, parseISO } from 'date-fns'
 import { es } from 'date-fns/locale'
 import Link from 'next/link'
-import { Users, ChevronRight, CheckCircle2, XCircle, Clock } from 'lucide-react'
+import { Users, ChevronRight, CheckCircle2, XCircle, Clock, Pencil } from 'lucide-react'
 import { avanzarPipeline, rechazarConductor } from './actions'
 
 const ESTADOS: Record<string, { label: string; cls: string }> = {
@@ -62,17 +62,23 @@ export default async function ConductoresPage() {
 
           return (
             <div key={c.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-              <div className="px-4 py-3 border-b border-gray-50">
+              <Link
+                href={`/equipo/conductores/${c.id}`}
+                className="block px-4 py-3 border-b border-gray-50 hover:bg-gray-50 transition-colors"
+              >
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <p className="font-semibold text-gray-900 text-sm">{c.nombre_completo}</p>
+                    <p className="font-semibold text-gray-900 text-sm flex items-center gap-1.5">
+                      {c.nombre_completo}
+                      <Pencil size={11} className="text-gray-300" />
+                    </p>
                     <p className="text-xs text-gray-400">CC {c.cedula} · {c.telefono}</p>
                   </div>
                   {estado && (
                     <span className={`shrink-0 text-xs px-2 py-0.5 rounded-full ${estado.cls}`}>{estado.label}</span>
                   )}
                 </div>
-              </div>
+              </Link>
 
               <div className="px-4 py-2 text-xs text-gray-500 flex gap-4">
                 <span className="flex items-center gap-1">
