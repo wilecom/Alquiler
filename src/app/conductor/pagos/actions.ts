@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { notify } from '@/lib/notifications/whatsapp'
 import { redirect } from 'next/navigation'
+import { after } from 'next/server'
 import { addWeeks, parseISO } from 'date-fns'
 
 export type PagoState = { error: string } | { success: string }
@@ -70,18 +71,21 @@ export async function subirComprobante(args: { path: string }): Promise<PagoStat
     .from('comprobantes')
     .createSignedUrl(args.path, 60 * 60 * 24 * 7)
 
-  // Fire-and-forget — no await so we don't block the response on a slow N8N
-  notify({
-    event: 'comprobante.subido',
-    conductor_id: conductor.id,
-    contrato_id: contrato.id,
-    nombre_conductor: conductor.nombre_completo,
-    telefono_conductor: conductor.telefono,
-    semana: semanasProcesadas + 1,
-    monto: 480000,
-    comprobante_url: signed?.signedUrl ?? args.path,
-    fecha_pago: hoy,
-  }).catch(() => {})
+  // Vercel mata el fetch fire-and-forget al cerrar la response;
+  // after() mantiene viva la invocación hasta que notify complete.
+  after(() =>
+    notify({
+      event: 'comprobante.subido',
+      conductor_id: conductor.id,
+      contrato_id: contrato.id,
+      nombre_conductor: conductor.nombre_completo,
+      telefono_conductor: conductor.telefono,
+      semana: semanasProcesadas + 1,
+      monto: 480000,
+      comprobante_url: signed?.signedUrl ?? args.path,
+      fecha_pago: hoy,
+    }),
+  )
 
   return { success: '¡Comprobante enviado! El equipo lo revisará pronto.' }
 }

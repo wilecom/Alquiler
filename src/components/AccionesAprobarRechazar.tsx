@@ -1,9 +1,38 @@
 'use client'
 
 import { useState } from 'react'
-import { CheckCircle2, XCircle } from 'lucide-react'
+import { useFormStatus } from 'react-dom'
+import { CheckCircle2, XCircle, Loader2 } from 'lucide-react'
 
 type Action = (fd: FormData) => Promise<void> | Promise<unknown>
+
+function BotonAprobar({ label }: { label: string }) {
+  const { pending } = useFormStatus()
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-xl py-2.5 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+    >
+      {pending ? <Loader2 size={15} className="animate-spin" /> : <CheckCircle2 size={15} />}
+      {pending ? 'Procesando…' : label}
+    </button>
+  )
+}
+
+function BotonConfirmarRechazo() {
+  const { pending } = useFormStatus()
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="flex-1 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-xl py-2 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+    >
+      {pending && <Loader2 size={14} className="animate-spin" />}
+      {pending ? 'Procesando…' : 'Confirmar rechazo'}
+    </button>
+  )
+}
 
 export function AccionesAprobarRechazar({
   aprobar,
@@ -40,12 +69,7 @@ export function AccionesAprobarRechazar({
           >
             Cancelar
           </button>
-          <button
-            type="submit"
-            className="flex-1 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-xl py-2 transition-colors"
-          >
-            Confirmar rechazo
-          </button>
+          <BotonConfirmarRechazo />
         </div>
       </form>
     )
@@ -54,12 +78,7 @@ export function AccionesAprobarRechazar({
   return (
     <div className="flex gap-2 w-full">
       <form action={aprobar as (fd: FormData) => Promise<void>} className="flex-1">
-        <button
-          type="submit"
-          className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-xl py-2.5 transition-colors"
-        >
-          <CheckCircle2 size={15} /> {labelAprobar}
-        </button>
+        <BotonAprobar label={labelAprobar} />
       </form>
       <button
         type="button"

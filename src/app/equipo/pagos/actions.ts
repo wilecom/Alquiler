@@ -22,17 +22,23 @@ export async function verificarPago(
   const { data: pagoCtx } = await supabase
     .from('pagos')
     .select(
-      'contrato_id, tipo, monto, dias_mora, multa_mora, fecha_pago, comprobante_url, contratos(conductor_id, semanas_pagadas, semanas_aplazatorias, ahorro_acumulado, bonos_acumulados, abonos_extras_acumulados, conductores(nombre_completo, telefono, cedula), vehiculos(placa))',
+      'estado, contrato_id, tipo, monto, dias_mora, multa_mora, fecha_pago, comprobante_url, contratos(conductor_id, semanas_pagadas, semanas_aplazatorias, ahorro_acumulado, bonos_acumulados, abonos_extras_acumulados, conductores(nombre_completo, telefono, cedula), vehiculos(placa))',
     )
     .eq('id', pagoId)
     .single()
 
   if (!pagoCtx) return { error: 'Pago no encontrado' }
+  if (pagoCtx.estado !== 'comprobante_subido') {
+    // Idempotencia: si el pago ya fue resuelto (re-submit del form, doble clic, retry),
+    // no volver a incrementar contadores ni reenviar WhatsApp.
+    return { success: true }
+  }
 
   const { error } = await supabase
     .from('pagos')
     .update({ estado: decision, aprobado_por: user.id })
     .eq('id', pagoId)
+    .eq('estado', 'comprobante_subido')
   if (error) return { error: error.message }
 
   const contrato = Array.isArray(pagoCtx.contratos) ? pagoCtx.contratos[0] : pagoCtx.contratos

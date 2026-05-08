@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { notify } from '@/lib/notifications/whatsapp'
 import { redirect } from 'next/navigation'
+import { after } from 'next/server'
 
 export type AbonoState = { error: string } | { success: string }
 
@@ -63,17 +64,19 @@ export async function subirAbonoExtra(args: {
     .from('comprobantes')
     .createSignedUrl(args.path, 60 * 60 * 24 * 7)
 
-  notify({
-    event: 'comprobante.subido',
-    conductor_id: conductor.id,
-    contrato_id: contrato.id,
-    nombre_conductor: conductor.nombre_completo,
-    telefono_conductor: conductor.telefono,
-    semana: 0,
-    monto,
-    comprobante_url: signed?.signedUrl ?? args.path,
-    fecha_pago: hoy,
-  }).catch(() => {})
+  after(() =>
+    notify({
+      event: 'comprobante.subido',
+      conductor_id: conductor.id,
+      contrato_id: contrato.id,
+      nombre_conductor: conductor.nombre_completo,
+      telefono_conductor: conductor.telefono,
+      semana: 0,
+      monto,
+      comprobante_url: signed?.signedUrl ?? args.path,
+      fecha_pago: hoy,
+    }),
+  )
 
   return { success: '¡Abono extra enviado! El equipo lo revisará pronto.' }
 }
