@@ -1,5 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
+import { FileText, ChevronRight } from 'lucide-react'
 import { PerfilForm } from './PerfilForm'
 
 export default async function PerfilPage() {
@@ -42,6 +44,22 @@ export default async function PerfilPage() {
           <p className="text-gray-900 font-medium">{conductor.email}</p>
         </div>
       </div>
+
+      <Link
+        href="/conductor/contrato"
+        className="block bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:bg-gray-50 transition-colors"
+      >
+        <div className="flex items-center gap-3">
+          <div className="bg-blue-50 p-2 rounded-xl">
+            <FileText className="text-blue-600" size={20} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-gray-900 text-sm">Mi contrato</p>
+            <p className="text-xs text-gray-400">Ver términos y descargar el documento firmado</p>
+          </div>
+          <ChevronRight size={18} className="text-gray-300" />
+        </div>
+      </Link>
 
       <PerfilForm
         defaults={{

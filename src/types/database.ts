@@ -188,6 +188,7 @@ export type Database = {
           ahorro_acumulado: number
           bonos_acumulados: number
           abonos_extras_acumulados: number
+          contrato_archivo_path: string | null
           estado: 'activo' | 'terminado' | 'comprado'
           fecha_terminacion: string | null
           created_at: string
@@ -207,6 +208,7 @@ export type Database = {
           ahorro_acumulado?: number
           bonos_acumulados?: number
           abonos_extras_acumulados?: number
+          contrato_archivo_path?: string | null
           estado?: 'activo' | 'terminado' | 'comprado'
           fecha_terminacion?: string | null
           created_at?: string
