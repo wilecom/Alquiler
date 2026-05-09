@@ -15,6 +15,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Auto Leasing Medellín",
   description: "Auto Leasing Medellín — gestión de leasing automotriz con opción de compra",
+  verification: {
+    other: {
+      "facebook-domain-verification": "42ua4arjt822c985os2yx229qx8tb5",
+    },
+  },
 };
 
 export default function RootLayout({
