@@ -25,7 +25,7 @@ export function PerfilForm({ defaults }: Props) {
           defaultValue={defaults.telefono}
           required
           inputMode="tel"
-          className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
         />
       </div>
       <div>
@@ -37,7 +37,7 @@ export function PerfilForm({ defaults }: Props) {
           name="barrio"
           defaultValue={defaults.barrio}
           required
-          className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
         />
       </div>
       <div>
@@ -49,7 +49,7 @@ export function PerfilForm({ defaults }: Props) {
           name="direccion"
           defaultValue={defaults.direccion}
           required
-          className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
         />
       </div>
 
@@ -63,7 +63,7 @@ export function PerfilForm({ defaults }: Props) {
       <button
         type="submit"
         disabled={pending}
-        className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-medium rounded-xl py-2.5 transition-colors"
+        className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-medium rounded-xl py-2.5 transition-colors"
       >
         {pending ? 'Guardando…' : 'Guardar cambios'}
       </button>

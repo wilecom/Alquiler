@@ -60,8 +60,8 @@ export default async function ContratoPage() {
       {/* Descargar contrato firmado */}
       <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
         <div className="flex items-start gap-3">
-          <div className="bg-blue-50 p-2 rounded-xl">
-            <FileText className="text-blue-600" size={22} />
+          <div className="bg-orange-50 p-2 rounded-xl">
+            <FileText className="text-orange-500" size={22} />
           </div>
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-gray-900 text-sm">Contrato firmado</p>
@@ -72,7 +72,7 @@ export default async function ContratoPage() {
           <a
             href={signedUrl}
             download
-            className="mt-3 w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-xl py-2.5 transition-colors"
+            className="mt-3 w-full flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-xl py-2.5 transition-colors"
           >
             <Download size={15} /> Descargar contrato
           </a>

@@ -12,10 +12,12 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <div className="bg-blue-600 rounded-2xl p-4 mb-4">
-            <Car className="text-white" size={36} />
+          <div className="bg-gray-900 rounded-2xl p-4 mb-4 ring-1 ring-orange-500/30">
+            <Car className="text-orange-500" size={36} />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Auto Leasing Medellín</h1>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Auto Leasing <span className="text-orange-500">Medellín</span>
+          </h1>
           <p className="text-gray-500 text-sm mt-1">Inicia sesión para continuar</p>
         </div>
 
@@ -38,7 +40,7 @@ export default function LoginPage() {
               autoComplete="email"
               required
               placeholder="tu@email.com"
-              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
             />
           </div>
 
@@ -53,14 +55,14 @@ export default function LoginPage() {
               autoComplete="current-password"
               required
               placeholder="••••••••"
-              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
             />
           </div>
 
           <button
             type="submit"
             disabled={pending}
-            className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium rounded-lg py-2.5 text-sm transition-colors"
+            className="w-full flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-medium rounded-lg py-2.5 text-sm transition-colors"
           >
             {pending ? (
               <>

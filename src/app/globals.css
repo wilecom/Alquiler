@@ -1,8 +1,12 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
+  --background: #f9fafb; /* gray-50 — body claro */
   --foreground: #171717;
+  --brand: #f97316; /* orange-500 — acento principal */
+  --brand-strong: #ea580c; /* orange-600 — hover/active */
+  --surface-dark: #111827; /* gray-900 — headers, nav, footer */
+  --surface-dark-soft: #1f2937; /* gray-800 — borders sutiles sobre dark */
   color-scheme: light;
 }
 
@@ -35,4 +39,10 @@ input::placeholder,
 textarea::placeholder {
   color: #9ca3af; /* gray-400 */
   opacity: 1;
+}
+
+/* Selection naranja */
+::selection {
+  background-color: #fed7aa; /* orange-200 */
+  color: #7c2d12; /* orange-900 */
 }

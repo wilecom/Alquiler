@@ -50,8 +50,8 @@ export default async function PerfilPage() {
         className="block bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:bg-gray-50 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <div className="bg-blue-50 p-2 rounded-xl">
-            <FileText className="text-blue-600" size={20} />
+          <div className="bg-orange-50 p-2 rounded-xl">
+            <FileText className="text-orange-500" size={20} />
           </div>
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-gray-900 text-sm">Mi contrato</p>

@@ -19,7 +19,7 @@ function formatCOP(v: number) {
 
 const ESTADO_PAGO_LABEL: Record<string, { label: string; cls: string }> = {
   pendiente:          { label: 'Pendiente',     cls: 'bg-yellow-100 text-yellow-700' },
-  comprobante_subido: { label: 'Por verificar', cls: 'bg-blue-100 text-blue-700' },
+  comprobante_subido: { label: 'Por verificar', cls: 'bg-orange-100 text-orange-600' },
   verificado:         { label: 'Verificado',    cls: 'bg-green-100 text-green-700' },
   rechazado:          { label: 'Rechazado',     cls: 'bg-red-100 text-red-700' },
 }
@@ -103,7 +103,7 @@ export default async function EquipoDashboardPage() {
 
         <Link href="/equipo/conductores" className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center gap-2 mb-1">
-            <Users size={15} className="text-blue-500" />
+            <Users size={15} className="text-orange-500" />
             <p className="text-xs text-gray-400">Contratos activos</p>
           </div>
           <p className="text-3xl font-bold text-gray-900">{contratosActivos ?? 0}</p>
@@ -114,7 +114,7 @@ export default async function EquipoDashboardPage() {
       <div>
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Contratos activos</h2>
-          <Link href="/equipo/contratos/nuevo" className="flex items-center gap-1 text-xs text-blue-600 font-medium">
+          <Link href="/equipo/contratos/nuevo" className="flex items-center gap-1 text-xs text-orange-500 font-medium">
             <PlusCircle size={13} /> Nuevo
           </Link>
         </div>

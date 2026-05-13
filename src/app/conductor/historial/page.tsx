@@ -14,7 +14,7 @@ function formatCOP(value: number) {
 
 const ESTADO_CONFIG: Record<string, { label: string; icon: React.FC<{ size?: number; className?: string }>; cls: string }> = {
   pendiente: { label: 'Pendiente', icon: Clock, cls: 'text-yellow-600 bg-yellow-50' },
-  comprobante_subido: { label: 'En revisión', icon: Clock, cls: 'text-blue-600 bg-blue-50' },
+  comprobante_subido: { label: 'En revisión', icon: Clock, cls: 'text-orange-500 bg-orange-50' },
   verificado: { label: 'Verificado', icon: CheckCircle2, cls: 'text-green-600 bg-green-50' },
   rechazado: { label: 'Rechazado', icon: XCircle, cls: 'text-red-600 bg-red-50' },
 }

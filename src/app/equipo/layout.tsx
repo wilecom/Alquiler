@@ -15,8 +15,11 @@ const navItems = [
 export default function EquipoLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <header className="bg-gray-900 text-white px-4 py-3 flex items-center justify-between">
-        <span className="font-bold text-lg">Auto Leasing Medellín <span className="text-gray-400 font-normal text-sm">· Equipo</span></span>
+      <header className="bg-gray-900 text-white px-4 py-3 flex items-center justify-between border-b border-gray-800">
+        <span className="font-bold text-lg">
+          Auto Leasing <span className="text-orange-500">Medellín</span>{' '}
+          <span className="text-gray-400 font-normal text-sm">· Equipo</span>
+        </span>
         <form action={logoutAction}>
           <button type="submit" className="text-gray-400 hover:text-white text-sm transition-colors">
             Salir
@@ -28,12 +31,12 @@ export default function EquipoLayout({ children }: { children: React.ReactNode }
         {children}
       </main>
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex overflow-x-auto">
+      <nav className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 flex overflow-x-auto">
         {navItems.map(({ href, icon: Icon, label }) => (
           <Link
             key={href}
             href={href}
-            className="flex-1 min-w-0 flex flex-col items-center py-2 gap-0.5 text-gray-500 hover:text-gray-900 transition-colors"
+            className="flex-1 min-w-0 flex flex-col items-center py-2 gap-0.5 text-gray-400 hover:text-orange-500 transition-colors"
           >
             <Icon size={20} />
             <span className="text-[10px] truncate">{label}</span>

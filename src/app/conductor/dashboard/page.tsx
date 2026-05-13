@@ -25,7 +25,7 @@ function formatCOP(value: number) {
 
 const ESTADOS_PAGO: Record<string, { label: string; color: string; icon: React.FC<{ size?: number }> }> = {
   pendiente: { label: 'Pendiente', color: 'text-yellow-600 bg-yellow-50', icon: Clock },
-  comprobante_subido: { label: 'En revisión', color: 'text-blue-600 bg-blue-50', icon: Clock },
+  comprobante_subido: { label: 'En revisión', color: 'text-orange-500 bg-orange-50', icon: Clock },
   verificado: { label: 'Verificado', color: 'text-green-600 bg-green-50', icon: CheckCircle2 },
   rechazado: { label: 'Rechazado', color: 'text-red-600 bg-red-50', icon: AlertCircle },
 }
@@ -123,19 +123,19 @@ export default async function DashboardPage() {
       <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
-            <TrendingUp className="text-blue-500" size={18} />
+            <TrendingUp className="text-orange-500" size={18} />
             <span className="text-sm font-medium text-gray-700">Progreso hacia la compra</span>
           </div>
-          <span className="text-sm font-bold text-blue-600">{progreso}%</span>
+          <span className="text-sm font-bold text-orange-500">{progreso}%</span>
         </div>
         <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
           <div
-            className="h-full bg-blue-500 rounded-full transition-all"
+            className="h-full bg-orange-500 rounded-full transition-all"
             style={{ width: `${progreso}%` }}
           />
         </div>
         <p className="text-sm text-gray-700 mt-3 text-center">
-          ¡Felicidades, {nombre}! Llevas un <span className="font-semibold text-blue-600">{progreso}%</span> de tu compra
+          ¡Felicidades, {nombre}! Llevas un <span className="font-semibold text-orange-500">{progreso}%</span> de tu compra
         </p>
         <p className="text-xs text-gray-400 mt-1 text-center">Te faltan</p>
         <p className="text-3xl font-bold text-gray-900 text-center leading-tight">
@@ -143,7 +143,7 @@ export default async function DashboardPage() {
         </p>
         <Link
           href="/conductor/abono-extra"
-          className="mt-4 flex items-center justify-center gap-2 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white rounded-xl py-3 px-4 font-semibold text-sm shadow-md hover:shadow-lg transition-all"
+          className="mt-4 flex items-center justify-center gap-2 bg-gradient-to-r from-purple-500 to-orange-500 hover:from-purple-600 hover:to-orange-500 text-white rounded-xl py-3 px-4 font-semibold text-sm shadow-md hover:shadow-lg transition-all"
         >
           <Sparkles size={18} />
           <span>Hacer abono extraordinario</span>
@@ -169,11 +169,11 @@ export default async function DashboardPage() {
       )}
 
       {/* Próxima fecha */}
-      <div className={`rounded-2xl p-4 flex gap-3 items-center ${enMora ? 'bg-red-50' : 'bg-blue-50'}`}>
-        <Calendar className={enMora ? 'text-red-500' : 'text-blue-500'} size={20} />
+      <div className={`rounded-2xl p-4 flex gap-3 items-center ${enMora ? 'bg-red-50' : 'bg-orange-50'}`}>
+        <Calendar className={enMora ? 'text-red-500' : 'text-orange-500'} size={20} />
         <div>
           <p className="text-xs text-gray-500">Próxima fecha de pago</p>
-          <p className={`font-semibold capitalize ${enMora ? 'text-red-700' : 'text-blue-700'}`}>
+          <p className={`font-semibold capitalize ${enMora ? 'text-red-700' : 'text-orange-600'}`}>
             {fmtDiaSemanaDiaMes(proximaFecha)}
           </p>
         </div>
@@ -209,7 +209,7 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-2 gap-3 pb-2">
         <Link
           href="/conductor/pagos"
-          className="flex flex-col items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl p-4 transition-colors"
+          className="flex flex-col items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white rounded-2xl p-4 transition-colors"
         >
           <Upload size={24} />
           <span className="text-sm font-medium text-center">Subir comprobante</span>

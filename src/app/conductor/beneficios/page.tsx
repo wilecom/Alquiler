@@ -51,7 +51,7 @@ export default async function BeneficiosConductorPage() {
           {beneficios.map((b) => (
             <div
               key={b.id}
-              className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-4 border border-blue-100 shadow-sm"
+              className="bg-gradient-to-br from-orange-50 to-purple-50 rounded-2xl p-4 border border-orange-100 shadow-sm"
             >
               <div className="flex items-start gap-3">
                 <div className="bg-white rounded-xl p-2 shrink-0">

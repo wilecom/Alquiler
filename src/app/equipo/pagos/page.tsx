@@ -72,7 +72,7 @@ export default async function EquipoPagosPage() {
                     <p className="font-semibold text-gray-900 text-sm">{contrato?.conductores?.nombre_completo ?? '—'}</p>
                     <p className="text-xs text-gray-400">{contrato?.vehiculos?.marca} {contrato?.vehiculos?.modelo} · {contrato?.vehiculos?.placa}</p>
                   </div>
-                  <span className={`shrink-0 text-xs px-2 py-0.5 rounded-full ${p.tipo === 'canon' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}`}>
+                  <span className={`shrink-0 text-xs px-2 py-0.5 rounded-full ${p.tipo === 'canon' ? 'bg-orange-100 text-orange-600' : 'bg-orange-100 text-orange-700'}`}>
                     {p.tipo === 'canon' ? 'Canon semanal' : 'Aplazatoria'}
                   </span>
                 </div>
@@ -107,7 +107,7 @@ export default async function EquipoPagosPage() {
                     href={comprobanteUrls.get(p.id)}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex items-center gap-2 text-sm text-blue-600 underline"
+                    className="flex items-center gap-2 text-sm text-orange-500 underline"
                   >
                     <FileText size={14} /> Ver comprobante
                   </a>

@@ -9,7 +9,7 @@ function formatCOP(v: number) {
 
 const ESTADO_V: Record<string, { label: string; cls: string }> = {
   disponible: { label: 'Disponible', cls: 'bg-green-100 text-green-700' },
-  arrendado:  { label: 'Arrendado',  cls: 'bg-blue-100 text-blue-700' },
+  arrendado:  { label: 'Arrendado',  cls: 'bg-orange-100 text-orange-600' },
   inactivo:   { label: 'Inactivo',   cls: 'bg-gray-100 text-gray-500' },
 }
 

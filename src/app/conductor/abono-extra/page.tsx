@@ -47,7 +47,7 @@ export default async function AbonoExtraPage() {
     <div className="p-4 space-y-4 max-w-lg mx-auto">
       <Link
         href="/conductor/dashboard"
-        className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-blue-600"
+        className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-orange-500"
       >
         <ArrowLeft size={14} /> Volver
       </Link>
@@ -59,7 +59,7 @@ export default async function AbonoExtraPage() {
         </p>
       </div>
 
-      <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-4 border border-blue-100">
+      <div className="bg-gradient-to-br from-orange-50 to-purple-50 rounded-2xl p-4 border border-orange-100">
         <div className="flex items-center gap-2 mb-2">
           <Sparkles className="text-purple-500" size={18} />
           <span className="text-sm font-medium text-gray-700">Cómo funciona</span>

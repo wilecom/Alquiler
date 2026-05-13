@@ -101,9 +101,9 @@ export default function PagosPage() {
         </p>
       </div>
 
-      <div className="bg-blue-50 rounded-2xl p-4 text-sm text-blue-700 space-y-1">
+      <div className="bg-orange-50 rounded-2xl p-4 text-sm text-orange-600 space-y-1">
         <p className="font-medium">¿Qué incluye el canon semanal?</p>
-        <ul className="text-blue-600 space-y-0.5 text-xs mt-1">
+        <ul className="text-orange-500 space-y-0.5 text-xs mt-1">
           <li>• $280.000 — Renta del vehículo</li>
           <li>• $80.000 — Ahorro (te lo devolvemos)</li>
           <li>• $120.000 — Bono hacia la compra</li>
@@ -132,7 +132,7 @@ export default function PagosPage() {
 
           <label
             htmlFor="comprobante"
-            className="border-2 border-dashed border-gray-200 rounded-xl p-8 flex flex-col items-center gap-3 cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors"
+            className="border-2 border-dashed border-gray-200 rounded-xl p-8 flex flex-col items-center gap-3 cursor-pointer hover:border-orange-300 hover:bg-orange-50 transition-colors"
           >
             <FileText className="text-gray-300" size={40} />
             <div className="text-center">
@@ -158,7 +158,7 @@ export default function PagosPage() {
           <button
             type="submit"
             disabled={pending}
-            className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium rounded-xl py-3 text-sm transition-colors"
+            className="w-full flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-medium rounded-xl py-3 text-sm transition-colors"
           >
             {pending ? (
               <>
