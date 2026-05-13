@@ -1,7 +1,12 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { addWeeks, parseISO, isPast, format } from 'date-fns'
-import { es } from 'date-fns/locale'
+import { addWeeks, parseISO } from 'date-fns'
+import {
+  esPasadoColombia,
+  fmtDiaMesCorto,
+  fmtDiaSemanaDiaMesAño,
+  hoyColombia,
+} from '@/lib/date/colombia'
 import Link from 'next/link'
 import {
   Users, CreditCard, CalendarOff, AlertTriangle,
@@ -24,7 +29,7 @@ export default async function EquipoDashboardPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 
-  const hoy = new Date()
+  const hoyStr = hoyColombia()
 
   const [
     { count: contratosActivos },
@@ -46,7 +51,7 @@ export default async function EquipoDashboardPage() {
   const filas = (contratos ?? []).map((c) => {
     const semanasProcesadas = c.semanas_pagadas + c.semanas_aplazatorias
     const proximaFecha = addWeeks(parseISO(c.primer_pago_fecha), semanasProcesadas)
-    const enMora = isPast(proximaFecha)
+    const enMora = esPasadoColombia(proximaFecha)
     const pagosArr = (c.pagos as { id: string; estado: string; created_at: string }[] | null) ?? []
     const ultimoPago = pagosArr.sort((a, b) => b.created_at.localeCompare(a.created_at))[0] ?? null
     return {
@@ -67,7 +72,7 @@ export default async function EquipoDashboardPage() {
     <div className="p-4 space-y-5 max-w-2xl mx-auto">
       <div className="pt-2">
         <h1 className="text-xl font-bold text-gray-900">Panel de control</h1>
-        <p className="text-gray-400 text-sm capitalize">{format(hoy, "EEEE d 'de' MMMM yyyy", { locale: es })}</p>
+        <p className="text-gray-400 text-sm capitalize">{fmtDiaSemanaDiaMesAño(hoyStr)}</p>
       </div>
 
       {/* Stats */}
@@ -151,7 +156,7 @@ export default async function EquipoDashboardPage() {
                   <span>
                     Próximo:{' '}
                     <span className={f.enMora ? 'text-red-600 font-medium' : ''}>
-                      {format(f.proximaFecha, "d MMM", { locale: es })}
+                      {fmtDiaMesCorto(f.proximaFecha)}
                     </span>
                   </span>
                 </div>

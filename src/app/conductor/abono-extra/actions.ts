@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { notify } from '@/lib/notifications/whatsapp'
 import { redirect } from 'next/navigation'
 import { after } from 'next/server'
+import { hoyColombia } from '@/lib/date/colombia'
 
 export type AbonoState = { error: string } | { success: string }
 
@@ -47,7 +48,7 @@ export async function subirAbonoExtra(args: {
     return { error: `El monto supera el saldo restante (${restante.toLocaleString('es-CO')} COP).` }
   }
 
-  const hoy = new Date().toISOString().split('T')[0]
+  const hoy = hoyColombia()
 
   const { error: pagoErr } = await supabase.from('pagos').insert({
     contrato_id: contrato.id,

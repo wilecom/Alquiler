@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { format, parseISO } from 'date-fns'
-import { es } from 'date-fns/locale'
+import { fmtDiaMes, fmtFechaHoraCorta } from '@/lib/date/colombia'
 import { FileText, CreditCard } from 'lucide-react'
 import { verificarPago } from './actions'
 import { AccionesAprobarRechazar } from '@/components/AccionesAprobarRechazar'
@@ -93,11 +92,11 @@ export default async function EquipoPagosPage() {
                 )}
                 <div className="flex justify-between">
                   <span className="text-gray-400">Vence</span>
-                  <span className="text-gray-700">{format(parseISO(p.fecha_vencimiento), "d 'de' MMMM", { locale: es })}</span>
+                  <span className="text-gray-700">{fmtDiaMes(p.fecha_vencimiento)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-400">Subido</span>
-                  <span className="text-gray-700">{format(parseISO(p.created_at), "d MMM, HH:mm", { locale: es })}</span>
+                  <span className="text-gray-700">{fmtFechaHoraCorta(p.created_at)}</span>
                 </div>
               </div>
 

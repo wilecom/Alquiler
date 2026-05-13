@@ -2,8 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { FileText, Download, ArrowLeft, Users, Car } from 'lucide-react'
-import { format, parseISO } from 'date-fns'
-import { es } from 'date-fns/locale'
+import { fmtDiaMesAño } from '@/lib/date/colombia'
 
 function formatCOP(v: number) {
   return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(v)
@@ -113,7 +112,7 @@ export default async function ContratoPage() {
         </div>
         <div className="flex justify-between">
           <span className="text-gray-400">Primer pago</span>
-          <span className="text-gray-900">{format(parseISO(contrato.primer_pago_fecha), "d 'de' MMMM yyyy", { locale: es })}</span>
+          <span className="text-gray-900">{fmtDiaMesAño(contrato.primer_pago_fecha)}</span>
         </div>
       </div>
 

@@ -1,4 +1,5 @@
 import 'server-only'
+import { mesEnEspañol } from '@/lib/date/colombia'
 
 const N8N_BASE = process.env.N8N_BASE_URL ?? 'https://primary-production-7a21b.up.railway.app'
 
@@ -13,11 +14,6 @@ const COMPROBANTES_FOLDER_POR_PLACA: Record<string, string> = {
   'KAO 710': '1z7qeplKWKGc0Cm_VQhVr6mUZ2Lo8S1L-',
   'TST123': '1ois4SY31VTz8iAuVT9XoODx1h8-t0fcI',
 }
-
-const MESES_ES = [
-  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
-]
 
 export type PagoArchivadoPayload = {
   contrato_id: string
@@ -45,8 +41,9 @@ export async function archivarPago(payload: PagoArchivadoPayload): Promise<void>
   const ficha_sheet = FICHA_POR_PLACA[placaNorm] ?? FICHA_POR_PLACA[payload.placa] ?? null
   const comprobantes_folder_id =
     COMPROBANTES_FOLDER_POR_PLACA[placaNorm] ?? COMPROBANTES_FOLDER_POR_PLACA[payload.placa] ?? null
-  const fecha = new Date(payload.fecha_pago)
-  const mes_pago = isNaN(fecha.getTime()) ? '' : MESES_ES[fecha.getUTCMonth()]
+  // mes_pago en zona Colombia para que un pago aprobado a las 8pm Colombia del
+  // último día del mes no quede archivado como el mes siguiente (sería UTC).
+  const mes_pago = payload.fecha_pago ? mesEnEspañol(payload.fecha_pago) : ''
   const enriched = { ...payload, ficha_sheet, mes_pago, comprobantes_folder_id }
   try {
     const res = await fetch(url, {

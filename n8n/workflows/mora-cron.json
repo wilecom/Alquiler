@@ -24,7 +24,7 @@
     {
       "parameters": {
         "method": "GET",
-        "url": "=https://nyqzwlawchvvqnwwopxc.supabase.co/rest/v1/pagos?select=id,contrato_id,monto,fecha_vencimiento,contratos(conductor_id,vehiculos(placa),conductores(nombre_completo,telefono))&estado=eq.pendiente&fecha_vencimiento=lt.{{ $now.format('yyyy-MM-dd') }}&order=fecha_vencimiento.asc",
+        "url": "=https://nyqzwlawchvvqnwwopxc.supabase.co/rest/v1/pagos?select=id,contrato_id,monto,fecha_vencimiento,contratos(conductor_id,vehiculos(placa),conductores(nombre_completo,telefono))&estado=eq.pendiente&fecha_vencimiento=lt.{{ $now.setZone('America/Bogota').toFormat('yyyy-MM-dd') }}&order=fecha_vencimiento.asc",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "sendHeaders": true,
@@ -72,13 +72,13 @@
             {
               "id": "m3",
               "name": "dias_mora",
-              "value": "={{ Math.ceil((new Date() - new Date($json.fecha_vencimiento)) / 86400000) }}",
+              "value": "={{ Math.max(0, Math.floor((new Date(new Date().toLocaleDateString('en-CA', { timeZone: 'America/Bogota' })) - new Date($json.fecha_vencimiento)) / 86400000)) }}",
               "type": "number"
             },
             {
               "id": "m4",
               "name": "multa",
-              "value": "={{ Math.ceil((new Date() - new Date($json.fecha_vencimiento)) / 86400000) * 5000 }}",
+              "value": "={{ Math.max(0, Math.floor((new Date(new Date().toLocaleDateString('en-CA', { timeZone: 'America/Bogota' })) - new Date($json.fecha_vencimiento)) / 86400000)) * 5000 }}",
               "type": "number"
             },
             {

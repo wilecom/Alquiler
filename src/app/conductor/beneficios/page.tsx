@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { format, parseISO } from 'date-fns'
-import { es } from 'date-fns/locale'
+import { fmtDiaMes } from '@/lib/date/colombia'
 import { Gift, Sparkles } from 'lucide-react'
 
 export default async function BeneficiosConductorPage() {
@@ -66,12 +65,12 @@ export default async function BeneficiosConductorPage() {
                   <div className="flex flex-wrap gap-x-4 mt-2 text-xs text-gray-500">
                     <span>
                       Activado el{' '}
-                      {format(parseISO(b.fecha_activacion), "d 'de' MMMM", { locale: es })}
+                      {fmtDiaMes(b.fecha_activacion)}
                     </span>
                     {b.fecha_expiracion && (
                       <span>
                         Vence{' '}
-                        {format(parseISO(b.fecha_expiracion), "d 'de' MMMM", { locale: es })}
+                        {fmtDiaMes(b.fecha_expiracion)}
                       </span>
                     )}
                   </div>

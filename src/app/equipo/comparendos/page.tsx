@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { format, parseISO, differenceInDays } from 'date-fns'
-import { es } from 'date-fns/locale'
+import { diasDesdeHoyColombia, fmtDiaMesCorto } from '@/lib/date/colombia'
 import { AlertTriangle } from 'lucide-react'
 import ComparendoForm from './ComparendoForm'
 import { marcarPagado } from './actions'
@@ -29,7 +28,6 @@ export default async function ComparendosPage() {
       .eq('estado', 'activo'),
   ])
 
-  const hoy = new Date()
   const pendientes = comparendos?.filter((c) => c.estado === 'pendiente') ?? []
   const resueltos = comparendos?.filter((c) => c.estado !== 'pendiente') ?? []
 
@@ -49,7 +47,7 @@ export default async function ComparendosPage() {
           <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Pendientes</h2>
           {pendientes.map((c) => {
             const contrato = c.contratos as { conductores: { nombre_completo: string } | null; vehiculos: { placa: string } | null } | null
-            const diasRestantes = differenceInDays(parseISO(c.fecha_limite_pago), hoy)
+            const diasRestantes = diasDesdeHoyColombia(c.fecha_limite_pago)
             const urgente = diasRestantes <= 10
 
             return (
@@ -73,8 +71,8 @@ export default async function ComparendosPage() {
                     <p className="text-gray-500">Monto: <span className="font-medium text-gray-900">{formatCOP(c.monto)}</span></p>
                   )}
                   <div className="flex gap-4 text-xs text-gray-400">
-                    <span>Notificado: {format(parseISO(c.fecha_notificacion), "d MMM", { locale: es })}</span>
-                    <span>Límite: {format(parseISO(c.fecha_limite_pago), "d MMM", { locale: es })}</span>
+                    <span>Notificado: {fmtDiaMesCorto(c.fecha_notificacion)}</span>
+                    <span>Límite: {fmtDiaMesCorto(c.fecha_limite_pago)}</span>
                   </div>
                 </div>
                 <div className="px-4 pb-3">

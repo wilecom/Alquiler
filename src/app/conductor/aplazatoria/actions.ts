@@ -3,7 +3,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { notify } from '@/lib/notifications/whatsapp'
 import { redirect } from 'next/navigation'
-import { addWeeks, parseISO, startOfMonth, endOfMonth } from 'date-fns'
+import { addWeeks, parseISO } from 'date-fns'
+import { rangoMesColombia } from '@/lib/date/colombia'
 
 export type AplazatoriaState = { error: string } | { success: string } | null
 
@@ -44,18 +45,22 @@ export async function solicitarAplazatoria(
     return { error: 'No tienes un contrato activo.' }
   }
 
-  // Check monthly limit: max 1 aplazatoria per calendar month
-  const ahora = new Date()
-  const inicioMes = startOfMonth(ahora).toISOString()
-  const finMes = endOfMonth(ahora).toISOString()
+  // Límite: máx 1 aplazatoria por mes calendario (hora Colombia).
+  // El mes Colombia va de 00:00 col del día 1 (= 05:00 UTC) al 23:59:59 col último día
+  // (= 04:59:59 UTC del día 1 del mes siguiente). Convertimos a UTC ISO.
+  const { inicio, fin } = rangoMesColombia()
+  const inicioMesUtc = `${inicio}T05:00:00.000Z`
+  const [fy, fm, fd] = fin.split('-').map(Number)
+  // último instante del mes Colombia = primer instante del mes siguiente Colombia menos 1ms
+  const finMesSiguienteUtc = new Date(Date.UTC(fy, fm - 1, fd + 1, 5, 0, 0)).toISOString()
 
   const { data: aplazatoriaExistente } = await supabase
     .from('aplazatorias_solicitudes')
     .select('id, estado')
     .eq('contrato_id', contrato.id)
     .in('estado', ['pendiente', 'aprobada'])
-    .gte('created_at', inicioMes)
-    .lte('created_at', finMes)
+    .gte('created_at', inicioMesUtc)
+    .lt('created_at', finMesSiguienteUtc)
     .maybeSingle()
 
   if (aplazatoriaExistente) {
@@ -66,7 +71,7 @@ export async function solicitarAplazatoria(
   const primerPago = parseISO(contrato.primer_pago_fecha)
   const semanasProcesadas = contrato.semanas_pagadas + contrato.semanas_aplazatorias
   const semanaSolicitada = addWeeks(primerPago, semanasProcesadas)
-  const semanaSolicitadaStr = semanaSolicitada.toISOString().split('T')[0]
+  const semanaSolicitadaStr = semanaSolicitada.toISOString().slice(0, 10)
 
   const { error: insertError } = await supabase.from('aplazatorias_solicitudes').insert({
     contrato_id: contrato.id,

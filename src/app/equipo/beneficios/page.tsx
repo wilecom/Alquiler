@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { format, parseISO } from 'date-fns'
-import { es } from 'date-fns/locale'
+import { fmtDiaMesCorto, formatFecha } from '@/lib/date/colombia'
 import { Gift } from 'lucide-react'
 import { CrearBeneficioForm } from './CrearBeneficioForm'
 import { ToggleBeneficio } from './ToggleBeneficio'
@@ -112,9 +111,9 @@ export default async function EquipoBeneficiosPage() {
                           <p className="text-xs text-gray-500 mt-0.5">{b.descripcion}</p>
                         )}
                         <p className="text-[10px] text-gray-400 mt-1">
-                          {format(parseISO(b.fecha_activacion), "d MMM yyyy", { locale: es })}
+                          {formatFecha(b.fecha_activacion, { day: 'numeric', month: 'short', year: 'numeric' })}
                           {b.fecha_expiracion &&
-                            ` · vence ${format(parseISO(b.fecha_expiracion), "d MMM", { locale: es })}`}
+                            ` · vence ${fmtDiaMesCorto(b.fecha_expiracion)}`}
                         </p>
                       </div>
                       <ToggleBeneficio id={b.id} activo={b.activo} />

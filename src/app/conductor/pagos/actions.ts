@@ -5,6 +5,7 @@ import { notify } from '@/lib/notifications/whatsapp'
 import { redirect } from 'next/navigation'
 import { after } from 'next/server'
 import { addWeeks, parseISO } from 'date-fns'
+import { hoyColombia } from '@/lib/date/colombia'
 
 export type PagoState = { error: string } | { success: string }
 
@@ -36,7 +37,9 @@ export async function subirComprobante(args: { path: string }): Promise<PagoStat
   const primerPago = parseISO(contrato.primer_pago_fecha)
   const semanasProcesadas = contrato.semanas_pagadas + contrato.semanas_aplazatorias
   const fechaVencimiento = addWeeks(primerPago, semanasProcesadas)
-  const fechaVencimientoStr = fechaVencimiento.toISOString().split('T')[0]
+  // primer_pago es UTC-midnight (parseISO de 'YYYY-MM-DD'); addWeeks preserva la hora,
+  // así que toISOString().slice(0,10) sigue dando el día calendario correcto.
+  const fechaVencimientoStr = fechaVencimiento.toISOString().slice(0, 10)
 
   const { data: pagoExistente } = await supabase
     .from('pagos')
@@ -52,7 +55,7 @@ export async function subirComprobante(args: { path: string }): Promise<PagoStat
     return { error: 'Ya subiste un comprobante para esta semana y está en revisión.' }
   }
 
-  const hoy = new Date().toISOString().split('T')[0]
+  const hoy = hoyColombia()
 
   const { error: pagoError } = await supabase.from('pagos').insert({
     contrato_id: contrato.id,

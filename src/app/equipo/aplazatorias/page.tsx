@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { format, parseISO } from 'date-fns'
-import { es } from 'date-fns/locale'
+import { fmtDiaMesAño, fmtFechaHoraCorta } from '@/lib/date/colombia'
 import { CalendarOff } from 'lucide-react'
 import { resolverAplazatoria } from './actions'
 import { AccionesAprobarRechazar } from '@/components/AccionesAprobarRechazar'
@@ -55,7 +54,7 @@ export default async function AplazatoriasPage() {
               <div className="px-4 py-3 space-y-1 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-400">Semana solicitada</span>
-                  <span className="text-gray-700">{format(parseISO(s.semana_solicitada), "d 'de' MMMM yyyy", { locale: es })}</span>
+                  <span className="text-gray-700">{fmtDiaMesAño(s.semana_solicitada)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-400">Aplazatorias previas</span>
@@ -63,7 +62,7 @@ export default async function AplazatoriasPage() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-400">Solicitado</span>
-                  <span className="text-gray-700">{format(parseISO(s.created_at), "d MMM, HH:mm", { locale: es })}</span>
+                  <span className="text-gray-700">{fmtFechaHoraCorta(s.created_at)}</span>
                 </div>
               </div>
               {s.motivo && (

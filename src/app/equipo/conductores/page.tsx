@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { format, parseISO } from 'date-fns'
-import { es } from 'date-fns/locale'
+import { formatFecha } from '@/lib/date/colombia'
 import Link from 'next/link'
 import { Users, ChevronRight, CheckCircle2, XCircle, Clock, Pencil } from 'lucide-react'
 import { avanzarPipeline, rechazarConductor } from './actions'
@@ -83,7 +82,7 @@ export default async function ConductoresPage() {
               <div className="px-4 py-2 text-xs text-gray-500 flex gap-4">
                 <span className="flex items-center gap-1">
                   <Clock size={11} />
-                  {format(parseISO(c.created_at), "d MMM yyyy", { locale: es })}
+                  {formatFecha(c.created_at, { day: 'numeric', month: 'short', year: 'numeric' })}
                 </span>
                 <span>{c.tiene_licencia ? '✓ Licencia' : '✗ Sin licencia'}</span>
               </div>

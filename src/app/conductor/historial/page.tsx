@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { format, parseISO } from 'date-fns'
-import { es } from 'date-fns/locale'
+import { fmtDiaMes, fmtDiaMesAño } from '@/lib/date/colombia'
 import { CheckCircle2, Clock, AlertCircle, XCircle } from 'lucide-react'
 
 function formatCOP(value: number) {
@@ -81,8 +80,8 @@ export default async function HistorialPage() {
           {pagos.map((pago) => {
             const cfg = ESTADO_CONFIG[pago.estado] ?? ESTADO_CONFIG.pendiente
             const Icon = cfg.icon
-            const fechaVenc = format(parseISO(pago.fecha_vencimiento), "d 'de' MMMM yyyy", { locale: es })
-            const fechaPago = format(parseISO(pago.fecha_pago), "d 'de' MMMM", { locale: es })
+            const fechaVenc = fmtDiaMesAño(pago.fecha_vencimiento)
+            const fechaPago = fmtDiaMes(pago.fecha_pago)
 
             return (
               <div key={pago.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex gap-3">

@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { addWeeks, format, parseISO, isPast } from 'date-fns'
-import { es } from 'date-fns/locale'
+import { addWeeks, parseISO } from 'date-fns'
+import { esPasadoColombia, fmtDiaMes, fmtDiaSemanaDiaMes } from '@/lib/date/colombia'
 import Link from 'next/link'
 import {
   AlertCircle,
@@ -82,7 +82,9 @@ export default async function DashboardPage() {
   const primerPago = parseISO(contrato.primer_pago_fecha)
   const semanasProcesadas = contrato.semanas_pagadas + contrato.semanas_aplazatorias
   const proximaFecha = addWeeks(primerPago, semanasProcesadas)
-  const enMora = isPast(proximaFecha)
+  // Mora: la próxima fecha (calendario Colombia) es estrictamente anterior a hoy Colombia.
+  // El día exacto de pago NO cuenta como mora hasta que termine en hora Colombia.
+  const enMora = esPasadoColombia(proximaFecha)
   const abonosExtras = contrato.abonos_extras_acumulados ?? 0
   const abonadoCompra =
     contrato.ahorro_acumulado + contrato.bonos_acumulados + abonosExtras
@@ -159,7 +161,7 @@ export default async function DashboardPage() {
             <p className="font-semibold text-red-700 text-sm">Pago vencido</p>
             <p className="text-red-600 text-xs mt-0.5">
               Tenías que pagar el{' '}
-              {format(proximaFecha, "d 'de' MMMM", { locale: es })}.
+              {fmtDiaMes(proximaFecha)}.
               Súbelo hoy para evitar multas.
             </p>
           </div>
@@ -172,7 +174,7 @@ export default async function DashboardPage() {
         <div>
           <p className="text-xs text-gray-500">Próxima fecha de pago</p>
           <p className={`font-semibold capitalize ${enMora ? 'text-red-700' : 'text-blue-700'}`}>
-            {format(proximaFecha, "EEEE d 'de' MMMM", { locale: es })}
+            {fmtDiaSemanaDiaMes(proximaFecha)}
           </p>
         </div>
       </div>
