@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useActionState } from 'react'
 import { registrarConductor } from './actions'
 import { AlertCircle, CheckCircle2, Loader2, Car } from 'lucide-react'
@@ -23,12 +24,26 @@ export default function RegistroPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <header className="bg-gray-900 text-white px-4 py-4 text-center">
-        <div className="flex items-center justify-center gap-2 mb-1">
-          <Car size={20} />
-          <span className="font-bold text-lg">Auto Leasing Medellín</span>
+      <header className="relative bg-gray-900 text-white overflow-hidden">
+        <Image
+          src="/brand/hero-registro.png"
+          alt=""
+          aria-hidden
+          width={1376}
+          height={768}
+          priority
+          className="absolute inset-0 h-full w-full object-cover opacity-60"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-gray-900 via-gray-900/70 to-transparent" />
+        <div className="relative px-4 py-8 text-center">
+          <div className="flex items-center justify-center gap-2 mb-1">
+            <Car size={20} className="text-orange-500" />
+            <span className="font-bold text-lg">
+              Auto Leasing <span className="text-orange-500">Medellín</span>
+            </span>
+          </div>
+          <p className="text-gray-300 text-sm">Tu carro propio en 110 semanas</p>
         </div>
-        <p className="text-gray-400 text-sm">Formulario de postulación</p>
       </header>
 
       <main className="flex-1 p-4 max-w-lg mx-auto w-full">
