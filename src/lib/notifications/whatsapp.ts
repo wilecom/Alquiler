@@ -25,8 +25,8 @@ type ComprobanteResuelto = {
   tipo: 'canon' | 'aplazatoria' | 'abono_extra'
   decision: 'verificado' | 'rechazado'
   motivo?: string
-  total_pagado_canon?: number
-  total_canon_contrato?: number
+  abonado_compra?: number
+  valor_vehiculo?: number
   porcentaje?: number
   usar_template_abono?: boolean
 }
