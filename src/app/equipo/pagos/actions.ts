@@ -74,16 +74,50 @@ export async function verificarPago(
     : null
 
   if (conductor && contrato) {
+    const semanaReportada =
+      contrato.semanas_pagadas +
+      (decision === 'verificado' && pagoCtx.tipo === 'canon' ? 1 : 0)
+
+    // Datos de avance solo aplican a canon (las v2 los usan); para aplazatoria/abono_extra
+    // se queda con plantilla v1 simple.
+    let total_pagado_canon: number | undefined
+    let total_canon_contrato: number | undefined
+    let porcentaje: number | undefined
+    let usar_template_abono: boolean | undefined
+
+    if (pagoCtx.tipo === 'canon') {
+      const { data: canonesVerificados } = await supabase
+        .from('pagos')
+        .select('monto')
+        .eq('contrato_id', pagoCtx.contrato_id)
+        .eq('estado', 'verificado')
+        .eq('tipo', 'canon')
+      total_pagado_canon = (canonesVerificados ?? []).reduce(
+        (s, r) => s + (r.monto ?? 0),
+        0,
+      )
+      total_canon_contrato = 480000 * 110
+      porcentaje = total_pagado_canon / total_canon_contrato
+      // Mostrar tip de abono extra en hitos (cada 5 semanas) — sutilmente, no siempre
+      usar_template_abono =
+        decision === 'verificado' && semanaReportada > 0 && semanaReportada % 5 === 0
+    }
+
     await notify({
       event: 'comprobante.resuelto',
       conductor_id: contrato.conductor_id,
       contrato_id: pagoCtx.contrato_id,
       nombre_conductor: conductor.nombre_completo,
       telefono_conductor: conductor.telefono,
-      semana: contrato.semanas_pagadas + (decision === 'verificado' && pagoCtx.tipo === 'canon' ? 1 : 0),
+      semana: semanaReportada,
       monto: pagoCtx.monto,
+      tipo: pagoCtx.tipo,
       decision,
       motivo,
+      total_pagado_canon,
+      total_canon_contrato,
+      porcentaje,
+      usar_template_abono,
     })
   }
 

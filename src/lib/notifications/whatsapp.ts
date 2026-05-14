@@ -22,8 +22,13 @@ type ComprobanteResuelto = {
   telefono_conductor: string
   semana: number
   monto: number
+  tipo: 'canon' | 'aplazatoria' | 'abono_extra'
   decision: 'verificado' | 'rechazado'
   motivo?: string
+  total_pagado_canon?: number
+  total_canon_contrato?: number
+  porcentaje?: number
+  usar_template_abono?: boolean
 }
 
 type AplazatoriaPendiente = {
