@@ -437,6 +437,8 @@ export type Database = {
           firma_timestamp: string
           firma_ip: string | null
           firma_user_agent: string | null
+          sheet_row: number | null
+          sheet_synced_at: string | null
           created_at: string
           updated_at: string
         }
@@ -471,6 +473,8 @@ export type Database = {
           firma_timestamp: string
           firma_ip?: string | null
           firma_user_agent?: string | null
+          sheet_row?: number | null
+          sheet_synced_at?: string | null
           created_at?: string
           updated_at?: string
         }

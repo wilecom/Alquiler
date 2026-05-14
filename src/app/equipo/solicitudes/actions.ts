@@ -3,6 +3,13 @@
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { randomBytes } from 'node:crypto'
+import {
+  appendSolicitudToSheet,
+  updateSolicitudInSheet,
+  type SolicitudSheetRow,
+} from '@/lib/sheets/solicitudes'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import type { Database } from '@/types/database'
 
 const PIPELINE_ORDEN = ['formulario', 'visita_local', 'visita_domiciliaria'] as const
 type EstadoPipeline = typeof PIPELINE_ORDEN[number]
@@ -11,6 +18,45 @@ function generarPassword(): string {
   // 9 chars base64url, fácil de leer y compartir por WhatsApp.
   return randomBytes(7).toString('base64url')
 }
+
+type SheetSnapshot = SolicitudSheetRow & { sheet_row: number | null }
+
+/**
+ * Lee del Sheet la fila correspondiente y la actualiza. Si nunca tuvo sheet_row
+ * (porque el append inicial falló), hace append y persiste el nuevo row.
+ * Best-effort: errores del Sheet NO bloquean el flujo.
+ */
+async function reflectInSheet(
+  supabase: SupabaseClient<Database>,
+  solicitudId: string,
+  snapshot: SheetSnapshot,
+) {
+  try {
+    if (snapshot.sheet_row) {
+      const ok = await updateSolicitudInSheet(snapshot.sheet_row, snapshot)
+      if (ok) {
+        await supabase
+          .from('solicitudes')
+          .update({ sheet_synced_at: new Date().toISOString() })
+          .eq('id', solicitudId)
+      }
+      return
+    }
+    // No tenía sheet_row → intentar append ahora.
+    const newRow = await appendSolicitudToSheet(snapshot)
+    if (newRow !== null) {
+      await supabase
+        .from('solicitudes')
+        .update({ sheet_row: newRow, sheet_synced_at: new Date().toISOString() })
+        .eq('id', solicitudId)
+    }
+  } catch (err) {
+    console.warn('[sheets] reflectInSheet failed:', err)
+  }
+}
+
+const SHEET_SELECT =
+  'id, sheet_row, created_at, nombre_completo, cedula, edad, telefono, email, tiene_licencia, categoria_licencia, tiene_comparendos_pendientes, cantidad_comparendos, motivos_comparendos, estado, motivo_rechazo'
 
 export async function avanzarPipeline(solicitudId: string) {
   const supabase = await createClient()
@@ -30,12 +76,15 @@ export async function avanzarPipeline(solicitudId: string) {
   }
 
   const nuevoEstado = PIPELINE_ORDEN[idx + 1]
-  const { error } = await supabase
+  const { data: updated, error } = await supabase
     .from('solicitudes')
     .update({ estado: nuevoEstado, revisado_por: user.id })
     .eq('id', solicitudId)
+    .select(SHEET_SELECT)
+    .single()
 
   if (error) return { error: error.message }
+  if (updated) await reflectInSheet(supabase, solicitudId, updated as SheetSnapshot)
 
   revalidatePath('/equipo/solicitudes')
   revalidatePath(`/equipo/solicitudes/${solicitudId}`)
@@ -50,7 +99,7 @@ export async function rechazarSolicitud(solicitudId: string, formData: FormData)
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
 
-  const { error } = await supabase
+  const { data: updated, error } = await supabase
     .from('solicitudes')
     .update({
       estado: 'rechazada',
@@ -58,7 +107,10 @@ export async function rechazarSolicitud(solicitudId: string, formData: FormData)
       revisado_por: user.id,
     })
     .eq('id', solicitudId)
+    .select(SHEET_SELECT)
+    .single()
   if (error) return { error: error.message }
+  if (updated) await reflectInSheet(supabase, solicitudId, updated as SheetSnapshot)
 
   revalidatePath('/equipo/solicitudes')
   revalidatePath(`/equipo/solicitudes/${solicitudId}`)
@@ -156,7 +208,7 @@ export async function aprobarSolicitud(
     return { error: 'No se pudo crear el conductor: ' + (errCond?.message ?? 'desconocido') }
   }
 
-  const { error: errUpd } = await supabase
+  const { data: updated, error: errUpd } = await supabase
     .from('solicitudes')
     .update({
       estado: 'aprobada',
@@ -164,6 +216,8 @@ export async function aprobarSolicitud(
       revisado_por: user.id,
     })
     .eq('id', solicitudId)
+    .select(SHEET_SELECT)
+    .single()
 
   if (errUpd) {
     // No tirar abajo el conductor — mejor dejar la inconsistencia visible y corregir manualmente.
@@ -173,6 +227,8 @@ export async function aprobarSolicitud(
         errUpd.message,
     }
   }
+
+  if (updated) await reflectInSheet(supabase, solicitudId, updated as SheetSnapshot)
 
   revalidatePath('/equipo/solicitudes')
   revalidatePath(`/equipo/solicitudes/${solicitudId}`)

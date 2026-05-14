@@ -10,6 +10,7 @@ import {
   ArrowRight,
 } from 'lucide-react'
 import { avanzarPipeline } from './actions'
+import { SyncDesdeSheetButton } from './SyncDesdeSheetButton'
 
 const ESTADOS: Record<string, { label: string; cls: string }> = {
   formulario: { label: 'Formulario', cls: 'bg-gray-100 text-gray-600' },
@@ -56,6 +57,14 @@ export default async function SolicitudesPage() {
           + Formulario público
         </Link>
       </div>
+
+      <SyncDesdeSheetButton
+        sheetUrl={
+          process.env.SOLICITUDES_SHEET_ID
+            ? `https://docs.google.com/spreadsheets/d/${process.env.SOLICITUDES_SHEET_ID}/edit`
+            : undefined
+        }
+      />
 
       {activas.length === 0 && (
         <div className="bg-white rounded-2xl p-8 text-center border border-gray-100 shadow-sm">

@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { headers } from 'next/headers'
 import { solicitudSchema } from '@/lib/validators/solicitud'
+import { appendSolicitudToSheet } from '@/lib/sheets/solicitudes'
 
 export type EnviarSolicitudState =
   | { error: string }
@@ -59,30 +60,45 @@ export async function enviarSolicitud(
   const ip = xff ? xff.split(',')[0].trim() : h.get('x-real-ip') ?? null
   const ua = h.get('user-agent') ?? null
 
-  const { error: errInsert } = await supabase.from('solicitudes').insert({
-    nombre_completo: d.nombre_completo,
-    cedula: d.cedula,
-    edad: d.edad,
-    telefono: d.telefono,
-    email: d.email,
+  const { data: inserted, error: errInsert } = await supabase
+    .from('solicitudes')
+    .insert({
+      nombre_completo: d.nombre_completo,
+      cedula: d.cedula,
+      edad: d.edad,
+      telefono: d.telefono,
+      email: d.email,
 
-    tiene_licencia: d.tiene_licencia,
-    categoria_licencia: d.tiene_licencia ? d.categoria_licencia ?? null : null,
+      tiene_licencia: d.tiene_licencia,
+      categoria_licencia: d.tiene_licencia ? d.categoria_licencia ?? null : null,
 
-    tiene_comparendos_pendientes: d.tiene_comparendos_pendientes,
-    cantidad_comparendos: d.tiene_comparendos_pendientes ? d.cantidad_comparendos : 0,
-    motivos_comparendos: d.tiene_comparendos_pendientes
-      ? d.motivos_comparendos ?? null
-      : null,
+      tiene_comparendos_pendientes: d.tiene_comparendos_pendientes,
+      cantidad_comparendos: d.tiene_comparendos_pendientes ? d.cantidad_comparendos : 0,
+      motivos_comparendos: d.tiene_comparendos_pendientes
+        ? d.motivos_comparendos ?? null
+        : null,
 
-    acepta_habeas_data: true,
-    firma_timestamp: new Date().toISOString(),
-    firma_ip: ip,
-    firma_user_agent: ua,
-  })
+      acepta_habeas_data: true,
+      firma_timestamp: new Date().toISOString(),
+      firma_ip: ip,
+      firma_user_agent: ua,
+    })
+    .select(
+      'id, created_at, nombre_completo, cedula, edad, telefono, email, tiene_licencia, categoria_licencia, tiene_comparendos_pendientes, cantidad_comparendos, motivos_comparendos, estado, motivo_rechazo',
+    )
+    .single()
 
-  if (errInsert) {
-    return { error: errInsert.message }
+  if (errInsert || !inserted) {
+    return { error: errInsert?.message ?? 'No se pudo registrar la solicitud.' }
+  }
+
+  // Best-effort: replicar al Sheet. Si falla, no bloquea el flow del solicitante.
+  const sheetRow = await appendSolicitudToSheet(inserted)
+  if (sheetRow !== null) {
+    await supabase
+      .from('solicitudes')
+      .update({ sheet_row: sheetRow, sheet_synced_at: new Date().toISOString() })
+      .eq('id', inserted.id)
   }
 
   return {
