@@ -52,17 +52,43 @@ type AplazatoriaResuelta = {
   motivo?: string
 }
 
+type SolicitudRecibida = {
+  event: 'solicitud.recibida'
+  telefono: string
+  nombre: string
+}
+
+type SolicitudAVerificacion = {
+  event: 'solicitud.a_verificacion'
+  telefono: string
+  nombre: string
+}
+
+type EquipoAlertaSolicitudNueva = {
+  event: 'equipo.solicitud_nueva'
+  nombre: string
+  cedula: string
+  telefono: string
+  link: string
+}
+
 export type NotificationPayload =
   | ComprobanteSubido
   | ComprobanteResuelto
   | AplazatoriaPendiente
   | AplazatoriaResuelta
+  | SolicitudRecibida
+  | SolicitudAVerificacion
+  | EquipoAlertaSolicitudNueva
 
 const ROUTES: Record<NotificationPayload['event'], string> = {
   'comprobante.subido': '/webhook/comprobante-pago',
   'comprobante.resuelto': '/webhook/comprobante-resuelto',
   'aplazatoria.pendiente': '/webhook/aplazatoria-pendiente',
   'aplazatoria.resuelta': '/webhook/aplazatoria-resuelta',
+  'solicitud.recibida': '/webhook/solicitud-recibida',
+  'solicitud.a_verificacion': '/webhook/solicitud-a-verificacion',
+  'equipo.solicitud_nueva': '/webhook/equipo-alerta-solicitud-nueva',
 }
 
 export async function notify(payload: NotificationPayload): Promise<void> {

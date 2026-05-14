@@ -408,7 +408,7 @@ export type Database = {
       solicitudes: {
         Row: {
           id: string
-          estado: 'formulario' | 'visita_local' | 'visita_domiciliaria' | 'aprobada' | 'rechazada'
+          estado: 'formulario' | 'verificacion_documentos' | 'visita_local' | 'visita_domiciliaria' | 'aprobada' | 'rechazada'
           motivo_rechazo: string | null
           conductor_id: string | null
           revisado_por: string | null
@@ -438,13 +438,14 @@ export type Database = {
           firma_ip: string | null
           firma_user_agent: string | null
           sheet_row: number | null
+          sheet_tab: string | null
           sheet_synced_at: string | null
           created_at: string
           updated_at: string
         }
         Insert: {
           id?: string
-          estado?: 'formulario' | 'visita_local' | 'visita_domiciliaria' | 'aprobada' | 'rechazada'
+          estado?: 'formulario' | 'verificacion_documentos' | 'visita_local' | 'visita_domiciliaria' | 'aprobada' | 'rechazada'
           motivo_rechazo?: string | null
           conductor_id?: string | null
           revisado_por?: string | null
@@ -474,6 +475,7 @@ export type Database = {
           firma_ip?: string | null
           firma_user_agent?: string | null
           sheet_row?: number | null
+          sheet_tab?: string | null
           sheet_synced_at?: string | null
           created_at?: string
           updated_at?: string

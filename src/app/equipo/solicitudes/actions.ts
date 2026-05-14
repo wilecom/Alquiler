@@ -4,50 +4,55 @@ import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { randomBytes } from 'node:crypto'
 import {
-  appendSolicitudToSheet,
-  updateSolicitudInSheet,
+  reflectSolicitudInSheet,
   type SolicitudSheetRow,
 } from '@/lib/sheets/solicitudes'
+import { notify } from '@/lib/notifications/whatsapp'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/types/database'
 
-const PIPELINE_ORDEN = ['formulario', 'visita_local', 'visita_domiciliaria'] as const
+function normalizarTelefono(tel: string): string {
+  const digits = tel.replace(/\D/g, '')
+  return digits.startsWith('57') ? digits : '57' + digits
+}
+
+// Pipeline ampliado: después del formulario hacemos verificación de SIMIT/policía
+// antes de mandar al equipo a las visitas.
+const PIPELINE_ORDEN = [
+  'formulario',
+  'verificacion_documentos',
+  'visita_local',
+  'visita_domiciliaria',
+] as const
 type EstadoPipeline = typeof PIPELINE_ORDEN[number]
 
 function generarPassword(): string {
-  // 9 chars base64url, fácil de leer y compartir por WhatsApp.
   return randomBytes(7).toString('base64url')
 }
 
-type SheetSnapshot = SolicitudSheetRow & { sheet_row: number | null }
+type SheetSnapshot = SolicitudSheetRow & {
+  sheet_row: number | null
+  sheet_tab: string | null
+}
 
-/**
- * Lee del Sheet la fila correspondiente y la actualiza. Si nunca tuvo sheet_row
- * (porque el append inicial falló), hace append y persiste el nuevo row.
- * Best-effort: errores del Sheet NO bloquean el flujo.
- */
 async function reflectInSheet(
   supabase: SupabaseClient<Database>,
   solicitudId: string,
   snapshot: SheetSnapshot,
 ) {
   try {
-    if (snapshot.sheet_row) {
-      const ok = await updateSolicitudInSheet(snapshot.sheet_row, snapshot)
-      if (ok) {
-        await supabase
-          .from('solicitudes')
-          .update({ sheet_synced_at: new Date().toISOString() })
-          .eq('id', solicitudId)
-      }
-      return
-    }
-    // No tenía sheet_row → intentar append ahora.
-    const newRow = await appendSolicitudToSheet(snapshot)
-    if (newRow !== null) {
+    const result = await reflectSolicitudInSheet(snapshot, {
+      tab: snapshot.sheet_tab,
+      row: snapshot.sheet_row,
+    })
+    if (result) {
       await supabase
         .from('solicitudes')
-        .update({ sheet_row: newRow, sheet_synced_at: new Date().toISOString() })
+        .update({
+          sheet_tab: result.tab,
+          sheet_row: result.row,
+          sheet_synced_at: new Date().toISOString(),
+        })
         .eq('id', solicitudId)
     }
   } catch (err) {
@@ -56,7 +61,7 @@ async function reflectInSheet(
 }
 
 const SHEET_SELECT =
-  'id, sheet_row, created_at, nombre_completo, cedula, edad, telefono, email, tiene_licencia, categoria_licencia, tiene_comparendos_pendientes, cantidad_comparendos, motivos_comparendos, estado, motivo_rechazo'
+  'id, sheet_row, sheet_tab, created_at, nombre_completo, cedula, edad, telefono, email, tiene_licencia, categoria_licencia, tiene_comparendos_pendientes, cantidad_comparendos, motivos_comparendos, estado, motivo_rechazo'
 
 export async function avanzarPipeline(solicitudId: string) {
   const supabase = await createClient()
@@ -84,7 +89,18 @@ export async function avanzarPipeline(solicitudId: string) {
     .single()
 
   if (error) return { error: error.message }
-  if (updated) await reflectInSheet(supabase, solicitudId, updated as SheetSnapshot)
+  if (updated) {
+    await reflectInSheet(supabase, solicitudId, updated as SheetSnapshot)
+
+    // WhatsApp al solicitante cuando entra a verificacion_documentos.
+    if (nuevoEstado === 'verificacion_documentos') {
+      await notify({
+        event: 'solicitud.a_verificacion',
+        telefono: normalizarTelefono(updated.telefono),
+        nombre: updated.nombre_completo.split(' ')[0],
+      })
+    }
+  }
 
   revalidatePath('/equipo/solicitudes')
   revalidatePath(`/equipo/solicitudes/${solicitudId}`)
@@ -128,7 +144,6 @@ export async function aprobarSolicitud(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
 
-  // Cargar la solicitud completa.
   const { data: solicitud, error: errSol } = await supabase
     .from('solicitudes')
     .select(
@@ -188,9 +203,6 @@ export async function aprobarSolicitud(
       nombre_completo: solicitud.nombre_completo,
       cedula: solicitud.cedula,
       edad: solicitud.edad,
-      // barrio y direccion en `conductores` son NOT NULL; en solicitudes ya no se
-      // piden en la captura inicial. El equipo completa estos datos en
-      // /equipo/conductores/[id].
       barrio: solicitud.barrio ?? 'Pendiente',
       direccion: solicitud.direccion ?? 'Pendiente',
       telefono: solicitud.telefono,
@@ -203,7 +215,6 @@ export async function aprobarSolicitud(
     .single()
 
   if (errCond || !conductor) {
-    // Rollback del auth user para evitar huérfanos.
     await admin.auth.admin.deleteUser(created.user.id)
     return { error: 'No se pudo crear el conductor: ' + (errCond?.message ?? 'desconocido') }
   }
@@ -220,7 +231,6 @@ export async function aprobarSolicitud(
     .single()
 
   if (errUpd) {
-    // No tirar abajo el conductor — mejor dejar la inconsistencia visible y corregir manualmente.
     return {
       error:
         'Conductor creado pero la solicitud no se pudo marcar como aprobada: ' +

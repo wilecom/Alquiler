@@ -12,13 +12,15 @@ import {
 
 type Estado =
   | 'formulario'
+  | 'verificacion_documentos'
   | 'visita_local'
   | 'visita_domiciliaria'
   | 'aprobada'
   | 'rechazada'
 
 const LABEL_SIGUIENTE: Record<Estado, string | null> = {
-  formulario: 'Pasar a visita local',
+  formulario: 'Pasar a verificación SIMIT/policía',
+  verificacion_documentos: 'Pasar a visita local',
   visita_local: 'Pasar a visita domiciliaria',
   visita_domiciliaria: null,
   aprobada: null,

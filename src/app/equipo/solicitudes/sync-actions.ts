@@ -69,6 +69,7 @@ export async function sincronizarDesdeSheet(
 
     type EstadoEnum =
       | 'formulario'
+      | 'verificacion_documentos'
       | 'visita_local'
       | 'visita_domiciliaria'
       | 'aprobada'

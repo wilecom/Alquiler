@@ -16,6 +16,7 @@ import { AccionesSolicitud } from './AccionesSolicitud'
 
 const ESTADOS: Record<string, { label: string; cls: string }> = {
   formulario: { label: 'Formulario', cls: 'bg-gray-100 text-gray-600' },
+  verificacion_documentos: { label: 'Verif. SIMIT/policía', cls: 'bg-blue-100 text-blue-700' },
   visita_local: { label: 'Visita local', cls: 'bg-yellow-100 text-yellow-700' },
   visita_domiciliaria: { label: 'Visita domicilio', cls: 'bg-orange-100 text-orange-600' },
   aprobada: { label: 'Aprobada', cls: 'bg-green-100 text-green-700' },

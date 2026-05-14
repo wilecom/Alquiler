@@ -1,9 +1,15 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { headers } from 'next/headers'
 import { solicitudSchema } from '@/lib/validators/solicitud'
 import { appendSolicitudToSheet } from '@/lib/sheets/solicitudes'
+import { notify } from '@/lib/notifications/whatsapp'
+
+function normalizarTelefono(tel: string): string {
+  const digits = tel.replace(/\D/g, '')
+  return digits.startsWith('57') ? digits : '57' + digits
+}
 
 export type EnviarSolicitudState =
   | { error: string }
@@ -26,7 +32,9 @@ export async function enviarSolicitud(
   }
 
   const d = parsed.data
-  const supabase = await createClient()
+  // Usamos admin client para saltarse RLS: este insert es público (form sin auth),
+  // pero corre solo en el server action (service_role nunca llega al cliente).
+  const supabase = await createAdminClient()
 
   // Cédula duplicada en solicitudes o en conductores ya creados.
   const { data: dupSol } = await supabase
@@ -93,13 +101,34 @@ export async function enviarSolicitud(
   }
 
   // Best-effort: replicar al Sheet. Si falla, no bloquea el flow del solicitante.
-  const sheetRow = await appendSolicitudToSheet(inserted)
-  if (sheetRow !== null) {
+  const sheetLoc = await appendSolicitudToSheet(inserted)
+  if (sheetLoc !== null) {
     await supabase
       .from('solicitudes')
-      .update({ sheet_row: sheetRow, sheet_synced_at: new Date().toISOString() })
+      .update({
+        sheet_tab: sheetLoc.tab,
+        sheet_row: sheetLoc.row,
+        sheet_synced_at: new Date().toISOString(),
+      })
       .eq('id', inserted.id)
   }
+
+  // Best-effort: WhatsApp al solicitante (acuse) + alerta al equipo.
+  const telefonoFinal = normalizarTelefono(d.telefono)
+  await Promise.allSettled([
+    notify({
+      event: 'solicitud.recibida',
+      telefono: telefonoFinal,
+      nombre: d.nombre_completo.split(' ')[0],
+    }),
+    notify({
+      event: 'equipo.solicitud_nueva',
+      nombre: d.nombre_completo,
+      cedula: d.cedula,
+      telefono: d.telefono,
+      link: `https://autoleasingmedellin.com/equipo/solicitudes/${inserted.id}`,
+    }),
+  ])
 
   return {
     success:
