@@ -417,7 +417,7 @@ export type Database = {
           edad: number
           telefono: string
           email: string
-          barrio: string
+          barrio: string | null
           direccion: string | null
           tipo_vivienda: 'propia' | 'familiar' | 'arrendada' | null
           tiene_licencia: boolean
@@ -427,8 +427,8 @@ export type Database = {
           tiene_comparendos_pendientes: boolean
           cantidad_comparendos: number
           motivos_comparendos: string | null
-          ocupacion: string
-          ingreso_mensual_estimado: number
+          ocupacion: string | null
+          ingreso_mensual_estimado: number | null
           anos_actividad: number | null
           uso_plataformas: boolean
           plataformas_detalle: string | null
@@ -451,7 +451,7 @@ export type Database = {
           edad: number
           telefono: string
           email: string
-          barrio: string
+          barrio?: string | null
           direccion?: string | null
           tipo_vivienda?: 'propia' | 'familiar' | 'arrendada' | null
           tiene_licencia: boolean
@@ -461,8 +461,8 @@ export type Database = {
           tiene_comparendos_pendientes?: boolean
           cantidad_comparendos?: number
           motivos_comparendos?: string | null
-          ocupacion: string
-          ingreso_mensual_estimado: number
+          ocupacion?: string | null
+          ingreso_mensual_estimado?: number | null
           anos_actividad?: number | null
           uso_plataformas?: boolean
           plataformas_detalle?: string | null

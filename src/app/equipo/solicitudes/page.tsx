@@ -24,10 +24,6 @@ const SIGUIENTE: Record<string, string> = {
   visita_local: 'Pasar a visita domiciliaria',
 }
 
-function fmtCOP(monto: number) {
-  return monto.toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })
-}
-
 export default async function SolicitudesPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -36,7 +32,7 @@ export default async function SolicitudesPage() {
   const { data: solicitudes } = await supabase
     .from('solicitudes')
     .select(
-      'id, nombre_completo, cedula, telefono, estado, ocupacion, ingreso_mensual_estimado, uso_plataformas, tiene_licencia, created_at, conductor_id',
+      'id, nombre_completo, cedula, telefono, estado, tiene_licencia, created_at, conductor_id',
     )
     .order('created_at', { ascending: false })
 
@@ -93,12 +89,10 @@ export default async function SolicitudesPage() {
                 </div>
               </Link>
 
-              <div className="px-4 py-2 text-xs text-gray-500 grid grid-cols-2 gap-x-3 gap-y-1">
-                <span>{s.ocupacion}</span>
-                <span>{fmtCOP(s.ingreso_mensual_estimado)} / mes</span>
+              <div className="px-4 py-2 text-xs text-gray-500 flex flex-wrap gap-x-3 gap-y-1">
                 <span>{s.tiene_licencia ? '✓ Licencia' : '✗ Sin licencia'}</span>
-                <span>{s.uso_plataformas ? 'Plataformas' : 'Particular'}</span>
-                <span className="col-span-2">
+                <span>·</span>
+                <span>
                   {formatFecha(s.created_at, { day: 'numeric', month: 'short', year: 'numeric' })}
                 </span>
               </div>

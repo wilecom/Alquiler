@@ -80,9 +80,15 @@ export default async function SolicitudDetallePage({
     .order('orden', { ascending: true })
 
   const tieneCodeudores = (codeudores?.length ?? 0) > 0
-  const tieneDireccion = !!solicitud.direccion || !!solicitud.tipo_vivienda
+  const tieneBarrioDireccion =
+    !!solicitud.barrio || !!solicitud.direccion || !!solicitud.tipo_vivienda
   const tieneSuspensiones = solicitud.licencia_suspendida_antes
-  const tieneParqueo = !!solicitud.lugar_parqueo || !!solicitud.plataformas_detalle
+  const tieneTrabajoUso =
+    !!solicitud.ocupacion ||
+    solicitud.ingreso_mensual_estimado !== null ||
+    solicitud.anos_actividad !== null ||
+    !!solicitud.plataformas_detalle ||
+    !!solicitud.lugar_parqueo
 
   const estado = ESTADOS[solicitud.estado] ?? { label: solicitud.estado, cls: 'bg-gray-100' }
 
@@ -127,16 +133,15 @@ export default async function SolicitudDetallePage({
 
       <AccionesSolicitud solicitudId={solicitud.id} estado={solicitud.estado} />
 
-      {/* 1. Datos personales */}
-      <Section icon={<User size={16} className="text-orange-500" />} title="1. Datos personales">
+      <Section icon={<User size={16} className="text-orange-500" />} title="Datos personales">
         <Row label="Nombre" value={solicitud.nombre_completo} />
         <Row label="Cédula" value={solicitud.cedula} />
         <Row label="Edad" value={`${solicitud.edad} años`} />
         <Row label="Teléfono" value={solicitud.telefono} />
         <Row label="Email" value={solicitud.email} />
-        <Row label="Barrio" value={solicitud.barrio} />
-        {tieneDireccion && (
+        {tieneBarrioDireccion && (
           <>
+            {solicitud.barrio && <Row label="Barrio" value={solicitud.barrio} />}
             {solicitud.direccion && <Row label="Dirección" value={solicitud.direccion} />}
             {solicitud.tipo_vivienda && (
               <Row label="Tipo de vivienda" value={VIVIENDA_LABEL[solicitud.tipo_vivienda]} />
@@ -145,8 +150,7 @@ export default async function SolicitudDetallePage({
         )}
       </Section>
 
-      {/* 2. Licencia */}
-      <Section icon={<IdCard size={16} className="text-orange-500" />} title="2. Licencia de conducción">
+      <Section icon={<IdCard size={16} className="text-orange-500" />} title="Licencia de conducción">
         <Row label="Tiene licencia vigente" value={solicitud.tiene_licencia ? 'Sí' : 'No'} />
         {solicitud.tiene_licencia && solicitud.categoria_licencia && (
           <Row label="Categoría" value={solicitud.categoria_licencia} />
@@ -161,8 +165,7 @@ export default async function SolicitudDetallePage({
         )}
       </Section>
 
-      {/* 3. Comparendos */}
-      <Section icon={<AlertTriangle size={16} className="text-orange-500" />} title="3. Comparendos">
+      <Section icon={<AlertTriangle size={16} className="text-orange-500" />} title="Comparendos">
         <Row
           label="Pendientes"
           value={solicitud.tiene_comparendos_pendientes ? 'Sí' : 'No'}
@@ -177,32 +180,31 @@ export default async function SolicitudDetallePage({
         )}
       </Section>
 
-      {/* 4. Trabajo y uso */}
-      <Section icon={<Briefcase size={16} className="text-orange-500" />} title="4. Trabajo, ingresos y uso">
-        <Row label="Ocupación" value={solicitud.ocupacion} />
-        <Row label="Ingreso mensual estimado" value={fmtCOP(solicitud.ingreso_mensual_estimado)} />
-        {solicitud.anos_actividad !== null && (
-          <Row label="Años en la actividad" value={solicitud.anos_actividad.toString()} />
-        )}
-        <Row label="Uso del vehículo" value={solicitud.uso_plataformas ? 'Plataformas' : 'Uso propio'} />
-        {tieneParqueo && (
-          <>
-            {solicitud.plataformas_detalle && (
-              <Row label="Plataformas" value={solicitud.plataformas_detalle} />
-            )}
-            {solicitud.lugar_parqueo && (
-              <Row
-                label="Dónde parquea"
-                value={PARQUEO_LABEL[solicitud.lugar_parqueo] ?? solicitud.lugar_parqueo}
-              />
-            )}
-          </>
-        )}
-      </Section>
+      {/* 4. Trabajo y uso (solo aparece cuando el equipo registra los datos manualmente más adelante) */}
+      {tieneTrabajoUso && (
+        <Section icon={<Briefcase size={16} className="text-orange-500" />} title="Trabajo, ingresos y uso">
+          {solicitud.ocupacion && <Row label="Ocupación" value={solicitud.ocupacion} />}
+          {solicitud.ingreso_mensual_estimado !== null && (
+            <Row label="Ingreso mensual estimado" value={fmtCOP(solicitud.ingreso_mensual_estimado)} />
+          )}
+          {solicitud.anos_actividad !== null && (
+            <Row label="Años en la actividad" value={solicitud.anos_actividad.toString()} />
+          )}
+          <Row label="Uso del vehículo" value={solicitud.uso_plataformas ? 'Plataformas' : 'Uso propio'} />
+          {solicitud.plataformas_detalle && (
+            <Row label="Plataformas" value={solicitud.plataformas_detalle} />
+          )}
+          {solicitud.lugar_parqueo && (
+            <Row
+              label="Dónde parquea"
+              value={PARQUEO_LABEL[solicitud.lugar_parqueo] ?? solicitud.lugar_parqueo}
+            />
+          )}
+        </Section>
+      )}
 
-      {/* 5. Codeudores (solo si hay) */}
       {tieneCodeudores && (
-        <Section icon={<Users size={16} className="text-orange-500" />} title="5. Codeudores">
+        <Section icon={<Users size={16} className="text-orange-500" />} title="Codeudores">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {codeudores!.map((c) => (
               <div key={c.id} className="border border-gray-100 rounded-xl p-3 space-y-1">
@@ -218,8 +220,7 @@ export default async function SolicitudDetallePage({
         </Section>
       )}
 
-      {/* 6. Ley 1581 */}
-      <Section icon={<ShieldCheck size={16} className="text-orange-500" />} title={`${tieneCodeudores ? '6' : '5'}. Autorización Ley 1581`}>
+      <Section icon={<ShieldCheck size={16} className="text-orange-500" />} title="Autorización de tratamiento de datos">
         <Row label="Aceptación" value={solicitud.acepta_habeas_data ? 'Sí' : 'No'} />
         <Row label="Fecha" value={fmtDiaMesAño(solicitud.firma_timestamp)} />
         <Row label="Hora exacta" value={fmtFechaHoraCorta(solicitud.firma_timestamp)} />

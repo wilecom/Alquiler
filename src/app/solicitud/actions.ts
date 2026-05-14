@@ -65,7 +65,6 @@ export async function enviarSolicitud(
     edad: d.edad,
     telefono: d.telefono,
     email: d.email,
-    barrio: d.barrio,
 
     tiene_licencia: d.tiene_licencia,
     categoria_licencia: d.tiene_licencia ? d.categoria_licencia ?? null : null,
@@ -75,11 +74,6 @@ export async function enviarSolicitud(
     motivos_comparendos: d.tiene_comparendos_pendientes
       ? d.motivos_comparendos ?? null
       : null,
-
-    ocupacion: d.ocupacion,
-    ingreso_mensual_estimado: d.ingreso_mensual_estimado,
-    anos_actividad: d.anos_actividad ?? null,
-    uso_plataformas: d.uso_plataformas,
 
     acepta_habeas_data: true,
     firma_timestamp: new Date().toISOString(),

@@ -11,15 +11,14 @@ const bool = z
   .transform((v) => v === 'on' || v === 'true' || v === '1')
 
 export const solicitudSchema = z.object({
-  // 1. Datos personales (sin dirección ni tipo de vivienda — eso se pide después)
+  // 1. Datos personales (mínimos — el resto se pide en etapas posteriores)
   nombre_completo: trimmed(3, 120),
   cedula: trimmed(5, 20),
   edad: z.coerce.number().int().min(18).max(80),
   telefono: trimmed(7, 20),
   email: z.email(),
-  barrio: trimmed(1, 120),
 
-  // 2. Licencia (solo vigencia + categoría — suspensiones se preguntan después)
+  // 2. Licencia (vigencia + categoría)
   tiene_licencia: bool,
   categoria_licencia: z.enum(CATEGORIA_LICENCIA).optional(),
 
@@ -28,13 +27,7 @@ export const solicitudSchema = z.object({
   cantidad_comparendos: z.coerce.number().int().min(0).max(50).default(0),
   motivos_comparendos: trimmed(0, 500).optional(),
 
-  // 4. Trabajo, ingresos y uso
-  ocupacion: trimmed(2, 120),
-  ingreso_mensual_estimado: z.coerce.number().int().min(0).max(100_000_000),
-  anos_actividad: z.coerce.number().min(0).max(70).optional(),
-  uso_plataformas: bool,
-
-  // 5. Ley 1581
+  // 4. Autorización de tratamiento de datos
   acepta_habeas_data: bool.refine((v) => v === true, {
     message: 'Debes aceptar la autorización de tratamiento de datos.',
   }),

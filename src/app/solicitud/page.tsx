@@ -11,7 +11,6 @@ import {
   User,
   IdCard,
   AlertTriangle,
-  Briefcase,
   ShieldCheck,
 } from 'lucide-react'
 import { CATEGORIA_LICENCIA_OPCIONES } from '@/lib/validators/solicitud'
@@ -61,7 +60,7 @@ export default function SolicitudPage() {
               Auto Leasing <span className="text-orange-500">Medellín</span>
             </span>
           </div>
-          <p className="text-gray-300 text-sm">Tu carro propio en 110 semanas</p>
+          <p className="text-gray-300 text-sm">Tu solicitud para empezar el camino al carro propio</p>
         </div>
       </header>
 
@@ -112,9 +111,6 @@ export default function SolicitudPage() {
               </Field>
             </div>
 
-            <Field label="Barrio *">
-              <input name="barrio" required placeholder="Belén las Playas" className={inputCls} />
-            </Field>
           </section>
 
           {/* 2. Licencia de conducción */}
@@ -196,73 +192,11 @@ export default function SolicitudPage() {
             )}
           </section>
 
-          {/* 4. Trabajo, ingresos y uso del vehículo */}
-          <section className={cardCls}>
-            <header className="flex items-center gap-2">
-              <Briefcase size={16} className="text-orange-500" />
-              <h2 className="font-semibold text-gray-900">4. Trabajo, ingresos y uso del vehículo</h2>
-            </header>
-            <p className="text-xs text-gray-500 -mt-2">
-              Solo necesitamos tu declaración. Más adelante te pediremos extractos.
-            </p>
-
-            <Field label="Ocupación / actividad principal *">
-              <input
-                name="ocupacion"
-                required
-                placeholder="Conductor de plataformas, mensajero, comerciante…"
-                className={inputCls}
-              />
-            </Field>
-
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="Ingreso mensual estimado (COP) *">
-                <input
-                  type="number"
-                  name="ingreso_mensual_estimado"
-                  required
-                  min={0}
-                  step={50000}
-                  placeholder="2500000"
-                  className={inputCls}
-                />
-              </Field>
-              <Field label="Años en la actividad">
-                <input
-                  type="number"
-                  name="anos_actividad"
-                  step={0.5}
-                  min={0}
-                  max={70}
-                  placeholder="3"
-                  className={inputCls}
-                />
-              </Field>
-            </div>
-
-            <div className="space-y-2 pt-1">
-              <span className={labelCls}>¿Para qué vas a usar el vehículo? *</span>
-              <div className="grid grid-cols-2 gap-2">
-                <label className="flex items-center justify-center gap-2 border border-gray-200 rounded-xl px-3 py-2.5 text-sm cursor-pointer has-checked:border-gray-900 has-checked:bg-gray-50">
-                  <input type="radio" name="uso_plataformas" value="" required className="accent-gray-900" />
-                  Uso propio
-                </label>
-                <label className="flex items-center justify-center gap-2 border border-gray-200 rounded-xl px-3 py-2.5 text-sm cursor-pointer has-checked:border-gray-900 has-checked:bg-gray-50">
-                  <input type="radio" name="uso_plataformas" value="on" required className="accent-gray-900" />
-                  Plataformas
-                </label>
-              </div>
-              <p className="text-[11px] text-gray-400">
-                Plataformas = Uber, Didi, InDriver, etc. No te pedimos detalle ahora.
-              </p>
-            </div>
-          </section>
-
-          {/* 5. Declaración Ley 1581 */}
+          {/* 4. Autorización de tratamiento de datos */}
           <section className={cardCls}>
             <header className="flex items-center gap-2">
               <ShieldCheck size={16} className="text-orange-500" />
-              <h2 className="font-semibold text-gray-900">5. Autorización Ley 1581 de 2012</h2>
+              <h2 className="font-semibold text-gray-900">4. Autorización de tratamiento de datos</h2>
             </header>
 
             <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 text-xs text-gray-600 space-y-2 max-h-60 overflow-y-auto">

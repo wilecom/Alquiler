@@ -91,7 +91,7 @@ export async function aprobarSolicitud(
       edad: number
       telefono: string
       email: string
-      barrio: string
+      barrio: string | null
       direccion: string | null
       tiene_licencia: boolean
       tiene_comparendos_pendientes: boolean
@@ -136,9 +136,10 @@ export async function aprobarSolicitud(
       nombre_completo: solicitud.nombre_completo,
       cedula: solicitud.cedula,
       edad: solicitud.edad,
-      barrio: solicitud.barrio,
-      // direccion en `conductores` es NOT NULL; en solicitudes ya no se pide en la
-      // captura inicial. El equipo completa este dato en /equipo/conductores/[id].
+      // barrio y direccion en `conductores` son NOT NULL; en solicitudes ya no se
+      // piden en la captura inicial. El equipo completa estos datos en
+      // /equipo/conductores/[id].
+      barrio: solicitud.barrio ?? 'Pendiente',
       direccion: solicitud.direccion ?? 'Pendiente',
       telefono: solicitud.telefono,
       email: solicitud.email,
