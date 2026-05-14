@@ -40,10 +40,10 @@ export default async function ConductoresPage() {
           <p className="text-gray-400 text-sm">{activos.length} en pipeline</p>
         </div>
         <Link
-          href="/registro"
+          href="/solicitud"
           className="text-xs bg-gray-900 text-white px-3 py-2 rounded-xl font-medium hover:bg-gray-800 transition-colors"
         >
-          + Registro público
+          + Formulario público
         </Link>
       </div>
 

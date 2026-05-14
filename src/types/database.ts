@@ -405,6 +405,120 @@ export type Database = {
           }
         ]
       }
+      solicitudes: {
+        Row: {
+          id: string
+          estado: 'formulario' | 'visita_local' | 'visita_domiciliaria' | 'aprobada' | 'rechazada'
+          motivo_rechazo: string | null
+          conductor_id: string | null
+          revisado_por: string | null
+          nombre_completo: string
+          cedula: string
+          edad: number
+          telefono: string
+          email: string
+          barrio: string
+          direccion: string | null
+          tipo_vivienda: 'propia' | 'familiar' | 'arrendada' | null
+          tiene_licencia: boolean
+          categoria_licencia: string | null
+          licencia_suspendida_antes: boolean
+          detalle_suspensiones: string | null
+          tiene_comparendos_pendientes: boolean
+          cantidad_comparendos: number
+          motivos_comparendos: string | null
+          ocupacion: string
+          ingreso_mensual_estimado: number
+          anos_actividad: number | null
+          uso_plataformas: boolean
+          plataformas_detalle: string | null
+          lugar_parqueo: string | null
+          acepta_habeas_data: boolean
+          firma_timestamp: string
+          firma_ip: string | null
+          firma_user_agent: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          estado?: 'formulario' | 'visita_local' | 'visita_domiciliaria' | 'aprobada' | 'rechazada'
+          motivo_rechazo?: string | null
+          conductor_id?: string | null
+          revisado_por?: string | null
+          nombre_completo: string
+          cedula: string
+          edad: number
+          telefono: string
+          email: string
+          barrio: string
+          direccion?: string | null
+          tipo_vivienda?: 'propia' | 'familiar' | 'arrendada' | null
+          tiene_licencia: boolean
+          categoria_licencia?: string | null
+          licencia_suspendida_antes?: boolean
+          detalle_suspensiones?: string | null
+          tiene_comparendos_pendientes?: boolean
+          cantidad_comparendos?: number
+          motivos_comparendos?: string | null
+          ocupacion: string
+          ingreso_mensual_estimado: number
+          anos_actividad?: number | null
+          uso_plataformas?: boolean
+          plataformas_detalle?: string | null
+          lugar_parqueo?: string | null
+          acepta_habeas_data: boolean
+          firma_timestamp: string
+          firma_ip?: string | null
+          firma_user_agent?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: Partial<Database['public']['Tables']['solicitudes']['Insert']>
+        Relationships: [
+          {
+            foreignKeyName: 'solicitudes_conductor_id_fkey'
+            columns: ['conductor_id']
+            isOneToOne: false
+            referencedRelation: 'conductores'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+      solicitud_codeudores: {
+        Row: {
+          id: string
+          solicitud_id: string
+          orden: number
+          nombre_completo: string
+          cedula: string
+          telefono: string
+          relacion: string
+          ocupacion: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          solicitud_id: string
+          orden: number
+          nombre_completo: string
+          cedula: string
+          telefono: string
+          relacion: string
+          ocupacion: string
+          created_at?: string
+        }
+        Update: Partial<Database['public']['Tables']['solicitud_codeudores']['Insert']>
+        Relationships: [
+          {
+            foreignKeyName: 'solicitud_codeudores_solicitud_id_fkey'
+            columns: ['solicitud_id']
+            isOneToOne: false
+            referencedRelation: 'solicitudes'
+            referencedColumns: ['id']
+          }
+        ]
+      }
     }
     Views: Record<string, never>
     Functions: Record<string, never>
@@ -424,3 +538,5 @@ export type AplazatoriaSolicitud = Database['public']['Tables']['aplazatorias_so
 export type Comparendo = Database['public']['Tables']['comparendos']['Row']
 export type Liquidacion = Database['public']['Tables']['liquidaciones']['Row']
 export type Beneficio = Database['public']['Tables']['beneficios']['Row']
+export type Solicitud = Database['public']['Tables']['solicitudes']['Row']
+export type SolicitudCodeudor = Database['public']['Tables']['solicitud_codeudores']['Row']

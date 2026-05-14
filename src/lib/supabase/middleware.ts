@@ -30,8 +30,13 @@ export async function updateSession(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
+  const esRutaPublica =
+    pathname.startsWith('/auth') ||
+    pathname === '/registro' ||
+    pathname === '/solicitud'
+
   // Si está autenticado y en ruta pública, redirigir al dashboard según rol
-  if (user && (pathname.startsWith('/auth') || pathname === '/registro')) {
+  if (user && esRutaPublica) {
     const { data: perfil } = await supabase
       .from('perfiles')
       .select('rol')
@@ -46,7 +51,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Rutas públicas (sin sesión)
-  if (pathname.startsWith('/auth') || pathname === '/registro') {
+  if (esRutaPublica) {
     return supabaseResponse
   }
 

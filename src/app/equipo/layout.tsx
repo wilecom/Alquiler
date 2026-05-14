@@ -1,9 +1,10 @@
 import Link from 'next/link'
-import { LayoutDashboard, CreditCard, CalendarOff, Users, Car, AlertTriangle, Gift } from 'lucide-react'
+import { LayoutDashboard, CreditCard, CalendarOff, Users, Car, AlertTriangle, Gift, ClipboardList } from 'lucide-react'
 import { logoutAction } from '@/app/auth/actions'
 
 const navItems = [
   { href: '/equipo/dashboard', icon: LayoutDashboard, label: 'Inicio' },
+  { href: '/equipo/solicitudes', icon: ClipboardList, label: 'Solicitudes' },
   { href: '/equipo/pagos', icon: CreditCard, label: 'Pagos' },
   { href: '/equipo/aplazatorias', icon: CalendarOff, label: 'Aplazar' },
   { href: '/equipo/conductores', icon: Users, label: 'Conductores' },
