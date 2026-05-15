@@ -87,19 +87,11 @@ export default async function SolicitudesPage({
 
   return (
     <div className="p-4 space-y-4 max-w-2xl mx-auto">
-      <div className="pt-2 flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold text-gray-900">Solicitudes</h1>
-          <p className="text-gray-400 text-sm">
-            {activasAll.length} en revisión · {aprobadas.length} aprobadas · {rechazadas.length} rechazadas
-          </p>
-        </div>
-        <Link
-          href="/solicitud"
-          className="text-xs bg-gray-900 text-white px-3 py-2 rounded-xl font-medium hover:bg-gray-800 transition-colors"
-        >
-          + Formulario público
-        </Link>
+      <div className="pt-2">
+        <h1 className="text-xl font-bold text-gray-900">Solicitudes</h1>
+        <p className="text-gray-400 text-sm">
+          {activasAll.length} en revisión · {aprobadas.length} aprobadas · {rechazadas.length} rechazadas
+        </p>
       </div>
 
       <SyncDesdeSheetButton
