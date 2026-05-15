@@ -26,7 +26,7 @@
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"messaging_product\": \"whatsapp\",\n  \"to\": \"={{ $('Webhook').item.json.body.telefono }}\",\n  \"type\": \"template\",\n  \"template\": {\n    \"name\": \"solicitud_recibida\",\n    \"language\": {\n      \"code\": \"es\"\n    },\n    \"components\": [\n      {\n        \"type\": \"body\",\n        \"parameters\": [\n          {\n            \"type\": \"text\",\n            \"text\": \"={{ $('Webhook').item.json.body.nombre }}\"\n          }\n        ]\n      }\n    ]\n  }\n}",
+        "jsonBody": "={\n  \"messaging_product\": \"whatsapp\",\n  \"to\": \"{{ $('Webhook').item.json.body.telefono }}\",\n  \"type\": \"template\",\n  \"template\": {\n    \"name\": \"solicitud_recibida\",\n    \"language\": {\n      \"code\": \"es\"\n    },\n    \"components\": [\n      {\n        \"type\": \"body\",\n        \"parameters\": [\n          {\n            \"type\": \"text\",\n            \"text\": \"{{ $('Webhook').item.json.body.nombre }}\"\n          }\n        ]\n      }\n    ]\n  }\n}",
         "options": {}
       },
       "id": "http-solicitud-recibida",
