@@ -1,270 +1,210 @@
-'use client'
-
 import Image from 'next/image'
-import { useActionState, useState } from 'react'
-import { enviarSolicitud } from './actions'
+import Link from 'next/link'
 import {
-  AlertCircle,
-  CheckCircle2,
-  Loader2,
   Car,
-  User,
+  ClipboardList,
+  Phone,
+  Home,
+  Key,
+  ChevronRight,
+  Clock,
+  ShieldCheck,
   IdCard,
   AlertTriangle,
-  ShieldCheck,
+  User,
 } from 'lucide-react'
-import { CATEGORIA_LICENCIA_OPCIONES } from '@/lib/validators/solicitud'
 
-const cardCls = 'bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4'
-const labelCls = 'text-xs font-medium text-gray-600'
-const inputCls =
-  'w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900'
-
-export default function SolicitudPage() {
-  const [state, action, pending] = useActionState(enviarSolicitud, null)
-  const success = state && 'success' in state
-  const error = state && 'error' in state
-
-  const [tieneLicencia, setTieneLicencia] = useState(true)
-  const [tieneComparendos, setTieneComparendos] = useState(false)
-
-  if (success) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 max-w-md w-full text-center space-y-4">
-          <CheckCircle2 className="mx-auto text-green-500" size={48} />
-          <h2 className="text-xl font-bold text-gray-900">¡Solicitud enviada!</h2>
-          <p className="text-gray-500 text-sm">{'success' in state! && state!.success}</p>
-        </div>
-      </div>
-    )
-  }
-
+export default function SolicitudWelcomePage() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <header className="relative bg-gray-900 text-white overflow-hidden">
-        <Image
-          src="/brand/hero-registro.png"
-          alt=""
-          aria-hidden
-          width={1376}
-          height={768}
-          priority
-          className="absolute inset-0 h-full w-full object-cover opacity-60"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-gray-900 via-gray-900/70 to-transparent" />
-        <div className="relative px-4 py-8 text-center">
-          <div className="flex items-center justify-center gap-2 mb-1">
+      {/* HERO — imagen del Spark bolita arriba sin overlay agresivo, texto debajo */}
+      <header className="relative bg-gray-900 text-white">
+        {/* Top bar con marca */}
+        <div className="relative z-10 px-4 pt-4 pb-2">
+          <div className="max-w-2xl mx-auto flex items-center gap-2">
             <Car size={20} className="text-orange-500" />
-            <span className="font-bold text-lg">
+            <span className="font-bold text-base">
               Auto Leasing <span className="text-orange-500">Medellín</span>
             </span>
           </div>
-          <p className="text-gray-300 text-sm">Tu solicitud para empezar el camino al carro propio</p>
+        </div>
+
+        {/* Imagen full-width — usamos la original que el usuario aprobó (Spark M250 Activo
+            real, generación correcta entre el Matiz original y el GT moderno) */}
+        <div className="relative aspect-[16/10] sm:aspect-[16/8] w-full overflow-hidden bg-gray-900">
+          <Image
+            src="/brand/3-sparks-medellin.png"
+            alt="Tres Chevrolet Spark al atardecer con el skyline de Medellín"
+            fill
+            priority
+            className="object-cover object-center"
+            sizes="(max-width: 768px) 100vw, 768px"
+          />
+          {/* Gradient sutil solo en el borde inferior para fundir con el texto */}
+          <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-gray-900 via-gray-900/70 to-transparent" />
+        </div>
+
+        {/* Bloque de texto SOBRE fondo sólido (no sobre la imagen) */}
+        <div className="relative px-4 pt-2 pb-8 max-w-2xl mx-auto text-center">
+          <h1 className="text-3xl sm:text-4xl font-bold leading-[1.1] mb-3">
+            Tu carro propio<br />
+            <span className="text-orange-500">empieza aquí</span>
+          </h1>
+          <p className="text-gray-300 text-sm sm:text-base max-w-md mx-auto">
+            Arrendamos vehículos con opción de compra. Pagas semanalmente y cada cuota
+            te acerca a quedarte con tu carro.
+          </p>
         </div>
       </header>
 
-      <main className="flex-1 p-4 max-w-2xl mx-auto w-full">
-        <div className="bg-gray-50 rounded-2xl border border-gray-200 p-4 my-4 text-sm text-gray-600 space-y-1">
-          <p className="font-medium text-gray-700">Solicitud de ingreso al programa</p>
-          <p className="text-xs text-gray-500">
-            Completa la información a continuación. El equipo revisará tu solicitud y te
-            contactará por WhatsApp en un plazo de 48 horas hábiles. Luego seguimos con visita
-            local y visita domiciliaria.
-          </p>
+      <main className="flex-1 px-4 pb-12 max-w-2xl mx-auto w-full">
+        {/* Tarjeta CTA principal — pegada al borde superior del main, sin solapamiento */}
+        <Link
+          href="/solicitud/empezar"
+          className="block bg-orange-500 hover:bg-orange-600 text-white rounded-2xl px-5 py-4 mt-5 shadow-lg shadow-orange-900/20 transition-colors"
+        >
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="font-semibold text-base">Empezar mi solicitud</p>
+              <p className="text-xs text-orange-100 flex items-center gap-1 mt-0.5">
+                <Clock size={11} /> Toma menos de 3 minutos
+              </p>
+            </div>
+            <ChevronRight size={22} className="text-white shrink-0" />
+          </div>
+        </Link>
+
+        {/* Sección: ¿Cómo funciona? */}
+        <section className="mt-8">
+          <h2 className="text-base font-semibold text-gray-900 mb-3 flex items-center gap-2">
+            <span className="text-orange-500 text-xs uppercase tracking-wider">El proceso</span>
+          </h2>
+          <ol className="space-y-2">
+            <Paso n={1} icon={<ClipboardList size={16} className="text-orange-500" />} titulo="Llenas el formulario">
+              Datos personales, licencia y comparendos. 3 minutos máximo.
+            </Paso>
+            <Paso n={2} icon={<ShieldCheck size={16} className="text-orange-500" />} titulo="Verificamos SIMIT y antecedentes">
+              Revisamos tu información en SIMIT, RUNT y centrales de riesgo. 1 a 3 días hábiles.
+            </Paso>
+            <Paso n={3} icon={<Phone size={16} className="text-orange-500" />} titulo="Visita local en nuestras oficinas">
+              Nos conocemos en persona y revisamos documentos.
+            </Paso>
+            <Paso n={4} icon={<Home size={16} className="text-orange-500" />} titulo="Visita domiciliaria">
+              Vamos a tu casa para conocer tu entorno y validar referencias con tus codeudores.
+            </Paso>
+            <Paso n={5} icon={<Key size={16} className="text-orange-500" />} titulo="Recibes tu carro">
+              Si todo encaja, te entregamos las llaves y empiezas a pagar tu carro propio.
+            </Paso>
+          </ol>
+        </section>
+
+        {/* Imagen emocional */}
+        <div className="mt-8 rounded-2xl overflow-hidden shadow-sm border border-gray-100">
+          <Image
+            src="/brand/welcome-llaves.png"
+            alt="Conductor recibiendo las llaves de su Spark"
+            width={1024}
+            height={576}
+            className="w-full h-auto object-cover"
+          />
         </div>
 
-        <form action={action} className="space-y-4">
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 flex gap-2 text-sm text-red-700">
-              <AlertCircle size={15} className="shrink-0 mt-0.5" />
-              {'error' in state! && state!.error}
-            </div>
-          )}
+        {/* Sección: ¿Qué te vamos a pedir? */}
+        <section className="mt-8">
+          <h2 className="text-base font-semibold text-gray-900 mb-3 flex items-center gap-2">
+            <span className="text-orange-500 text-xs uppercase tracking-wider">
+              Lo que vamos a pedirte ahora
+            </span>
+          </h2>
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
+            <Item icon={<User size={16} className="text-gray-400" />} titulo="Datos personales">
+              Nombre, cédula, edad, teléfono y email.
+            </Item>
+            <Item icon={<IdCard size={16} className="text-gray-400" />} titulo="Licencia de conducción">
+              Si la tienes vigente y la categoría.
+            </Item>
+            <Item icon={<AlertTriangle size={16} className="text-gray-400" />} titulo="Comparendos">
+              Si tienes pendientes en SIMIT y de qué se trata.
+            </Item>
+            <Item icon={<ShieldCheck size={16} className="text-gray-400" />} titulo="Autorización de tratamiento de datos">
+              Tu permiso para validar tu información en bases públicas.
+            </Item>
+          </div>
+          <p className="text-xs text-gray-500 mt-3 px-1">
+            Los datos de dirección, ingresos y codeudores los recogemos más adelante en la
+            visita local. Por ahora solo necesitamos lo de arriba.
+          </p>
+        </section>
 
-          {/* 1. Datos personales */}
-          <section className={cardCls}>
-            <header className="flex items-center gap-2">
-              <User size={16} className="text-orange-500" />
-              <h2 className="font-semibold text-gray-900">1. Datos personales</h2>
-            </header>
-
-            <Field label="Nombre completo *">
-              <input name="nombre_completo" required placeholder="Juan Carlos Pérez García" className={inputCls} />
-            </Field>
-
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="Cédula *">
-                <input name="cedula" required placeholder="1234567890" className={inputCls} />
-              </Field>
-              <Field label="Edad *">
-                <input type="number" name="edad" required min={18} max={80} placeholder="30" className={inputCls} />
-              </Field>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="Teléfono *">
-                <input name="telefono" required placeholder="3001234567" className={inputCls} />
-              </Field>
-              <Field label="Email *">
-                <input type="email" name="email" required placeholder="tu@email.com" className={inputCls} />
-              </Field>
-            </div>
-
-          </section>
-
-          {/* 2. Licencia de conducción */}
-          <section className={cardCls}>
-            <header className="flex items-center gap-2">
-              <IdCard size={16} className="text-orange-500" />
-              <h2 className="font-semibold text-gray-900">2. Licencia de conducción</h2>
-            </header>
-
-            <label className="flex items-start gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                name="tiene_licencia"
-                checked={tieneLicencia}
-                onChange={(e) => setTieneLicencia(e.target.checked)}
-                className="mt-0.5 w-4 h-4 accent-gray-900"
-              />
-              <span className="text-sm text-gray-700">Tengo licencia de conducción vigente</span>
-            </label>
-
-            {tieneLicencia && (
-              <Field label="Categoría *">
-                <select name="categoria_licencia" required className={inputCls} defaultValue="">
-                  <option value="" disabled>
-                    Selecciona…
-                  </option>
-                  {CATEGORIA_LICENCIA_OPCIONES.map((o) => (
-                    <option key={o.value} value={o.value}>
-                      {o.label}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-            )}
-          </section>
-
-          {/* 3. Comparendos */}
-          <section className={cardCls}>
-            <header className="flex items-center gap-2">
-              <AlertTriangle size={16} className="text-orange-500" />
-              <h2 className="font-semibold text-gray-900">3. Comparendos</h2>
-            </header>
-
-            <label className="flex items-start gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                name="tiene_comparendos_pendientes"
-                checked={tieneComparendos}
-                onChange={(e) => setTieneComparendos(e.target.checked)}
-                className="mt-0.5 w-4 h-4 accent-gray-900"
-              />
-              <span className="text-sm text-gray-700">
-                Tengo comparendos pendientes en SIMIT
-              </span>
-            </label>
-
-            {tieneComparendos && (
-              <>
-                <Field label="¿Cuántos? *">
-                  <input
-                    type="number"
-                    name="cantidad_comparendos"
-                    min={0}
-                    max={50}
-                    defaultValue={1}
-                    className={inputCls}
-                  />
-                </Field>
-                <Field label="Motivos / detalle *">
-                  <textarea
-                    name="motivos_comparendos"
-                    required
-                    rows={3}
-                    className={inputCls}
-                    placeholder="Ej: 1 por mal estacionamiento, 1 por SOAT vencido."
-                  />
-                </Field>
-              </>
-            )}
-          </section>
-
-          {/* 4. Autorización de tratamiento de datos */}
-          <section className={cardCls}>
-            <header className="flex items-center gap-2">
-              <ShieldCheck size={16} className="text-orange-500" />
-              <h2 className="font-semibold text-gray-900">4. Autorización de tratamiento de datos</h2>
-            </header>
-
-            <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 text-xs text-gray-600 space-y-2 max-h-60 overflow-y-auto">
-              <p>
-                Como titular de los datos personales, autorizo de manera previa, libre, expresa,
-                informada e inequívoca a <strong>Auto Leasing Medellín</strong> para que recolecte,
-                almacene, use, transfiera y trate mis datos personales con el fin de evaluar mi
-                solicitud de leasing automotriz, ejecutar el contrato y dar cumplimiento a las
-                obligaciones legales y comerciales derivadas.
-              </p>
-              <p>Autorizo expresamente la consulta y reporte ante:</p>
-              <ul className="list-disc list-inside ml-2 space-y-1">
-                <li>SIMIT — Sistema Integrado de Información de Multas y Sanciones por Infracciones de Tránsito.</li>
-                <li>RUNT — Registro Único Nacional de Tránsito.</li>
-                <li>Centrales de información financiera y crediticia (Datacrédito, TransUnion, CIFIN).</li>
-                <li>Bases de datos de antecedentes judiciales y disciplinarios públicos.</li>
-              </ul>
-              <p>
-                Declaro que la información suministrada es veraz y completa. Conozco mis derechos
-                de acceso, rectificación, actualización y supresión consagrados en la Ley 1581 de
-                2012 y el Decreto 1377 de 2013, y entiendo que puedo ejercerlos escribiendo a la
-                línea de atención de Auto Leasing Medellín.
-              </p>
-            </div>
-
-            <label className="flex items-start gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                name="acepta_habeas_data"
-                required
-                className="mt-0.5 w-4 h-4 accent-gray-900"
-              />
-              <span className="text-sm text-gray-700">
-                Acepto y autorizo el tratamiento de mis datos personales en los términos
-                anteriores.
-              </span>
-            </label>
-
-            <p className="text-[11px] text-gray-400">
-              Al enviar la solicitud queda registrada la fecha, hora, dirección IP y dispositivo
-              como constancia de tu autorización.
-            </p>
-          </section>
-
-          <button
-            type="submit"
-            disabled={pending}
-            className="w-full flex items-center justify-center gap-2 bg-gray-900 hover:bg-gray-800 disabled:bg-gray-400 text-white font-medium rounded-xl py-3 text-sm transition-colors"
+        {/* CTA final */}
+        <div className="mt-10">
+          <Link
+            href="/solicitud/empezar"
+            className="block w-full text-center bg-gray-900 hover:bg-gray-800 text-white font-semibold rounded-xl py-4 transition-colors"
           >
-            {pending ? (
-              <>
-                <Loader2 size={15} className="animate-spin" /> Enviando…
-              </>
-            ) : (
-              'Enviar solicitud'
-            )}
-          </button>
-        </form>
+            Empezar mi solicitud
+          </Link>
+          <p className="text-center text-xs text-gray-400 mt-3">
+            ¿Tienes preguntas? Escríbenos por WhatsApp al{' '}
+            <a
+              href="https://wa.me/573044903559"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-orange-500 hover:text-orange-600 font-medium"
+            >
+              +57 304 490 3559
+            </a>
+          </p>
+        </div>
       </main>
     </div>
   )
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Paso({
+  n,
+  icon,
+  titulo,
+  children,
+}: {
+  n: number
+  icon: React.ReactNode
+  titulo: string
+  children: React.ReactNode
+}) {
   return (
-    <div className="space-y-1">
-      <label className={labelCls}>{label}</label>
-      {children}
+    <li className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-3 flex gap-3">
+      <div className="flex flex-col items-center shrink-0">
+        <div className="w-7 h-7 rounded-full bg-gray-900 text-white text-xs font-bold flex items-center justify-center">
+          {n}
+        </div>
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="font-semibold text-sm text-gray-900 flex items-center gap-1.5">
+          {icon} {titulo}
+        </p>
+        <p className="text-xs text-gray-500 mt-0.5">{children}</p>
+      </div>
+    </li>
+  )
+}
+
+function Item({
+  icon,
+  titulo,
+  children,
+}: {
+  icon: React.ReactNode
+  titulo: string
+  children: React.ReactNode
+}) {
+  return (
+    <div className="flex gap-3">
+      <div className="shrink-0 mt-0.5">{icon}</div>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-medium text-gray-900">{titulo}</p>
+        <p className="text-xs text-gray-500 mt-0.5">{children}</p>
+      </div>
     </div>
   )
 }

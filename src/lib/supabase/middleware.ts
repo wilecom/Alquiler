@@ -33,7 +33,7 @@ export async function updateSession(request: NextRequest) {
   const esRutaPublica =
     pathname.startsWith('/auth') ||
     pathname === '/registro' ||
-    pathname === '/solicitud'
+    pathname.startsWith('/solicitud')
 
   // Si está autenticado y en ruta pública, redirigir al dashboard según rol
   if (user && esRutaPublica) {
